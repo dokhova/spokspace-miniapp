@@ -1,0 +1,514 @@
+.home {
+  width: 100%;
+  min-height: 100vh;
+  padding: 112px 0 112px;
+  box-sizing: border-box;
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .home {
+    padding-bottom: calc(112px + env(safe-area-inset-bottom) + 20px);
+  }
+}
+
+.home-inner {
+  max-width: 375px;
+  margin: 0 auto;
+  padding: 0 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.today__logo {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: var(--max-w);
+  width: 100%;
+  z-index: 100;
+  background-color: var(--main);
+  padding: 24px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.today__logo img {
+  height: 33px;
+  width: auto;
+}
+
+.today__user {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.2s;
+}
+
+.today__user:hover {
+  opacity: 0.8;
+}
+
+.today__user:active {
+  opacity: 0.6;
+}
+
+.today__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.today__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.today__avatar-placeholder {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+[class^="today__avatar--seed-"] {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.today__name {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 500;
+  color: var(--white);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.today__intro {
+  max-width: 100%;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.today__welcome {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  color: var(--text-2);
+}
+
+.today__title {
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.today__calendar {
+  width: 100%;
+  margin-top: 8px;
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 1;
+}
+
+.today__calendar-card {
+  width: 100%;
+  max-width: 100%;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 0 auto;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.today__calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.today__month-nav {
+  background: none;
+  border: none;
+  color: var(--text-2);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  font-size: 16px;
+  line-height: 1;
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.today__month-nav:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--white);
+}
+
+.today__month-nav:active {
+  transform: scale(0.9);
+}
+
+.today__month-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  background: none;
+  border: none;
+  color: inherit;
+}
+
+.today__month-display:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.today__current-month {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.today__expand-icon {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  transition: transform 0.3s ease;
+  filter: brightness(0) saturate(100%) invert(71%) sepia(4%) saturate(135%)
+    hue-rotate(201deg) brightness(86%) contrast(86%);
+  transform: rotate(90deg);
+}
+
+.today__expand-icon.expanded {
+  transform: rotate(-90deg);
+}
+
+.today__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.today__weekday {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-2);
+  padding: 5px 0;
+}
+
+.today__days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  column-gap: 4px;
+  row-gap: 12px;
+  transition: all 0.3s ease;
+  min-height: auto;
+}
+
+.today__day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--white);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  min-height: 32px;
+  padding: 1px;
+  background: none;
+  border: none;
+}
+
+.today__day:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.today__day.empty {
+  opacity: 0;
+  cursor: default;
+}
+
+.today__day.empty:hover {
+  background-color: transparent;
+}
+
+.today__day.today:not(.has-emotion) .today__day-emotion {
+  animation: emotionPulse 2s ease-in-out infinite;
+}
+
+.modal-open .today__day.today:not(.has-emotion) .today__day-emotion {
+  animation: none;
+}
+
+.today__day.future {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.today__day.future:hover {
+  background-color: transparent;
+}
+
+.today__day-emotion {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  margin-bottom: 6px;
+  flex-shrink: 0;
+  align-self: center;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23666666'/%3E%3Cpath d='M 15 25 L 25 25' stroke='%23333333' stroke-width='1.5' stroke-linecap='round'/%3E%3Ccircle cx='15' cy='17' r='1.5' fill='%23333333'/%3E%3Ccircle cx='25' cy='17' r='1.5' fill='%23333333'/%3E%3C/svg%3E");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.today__day-number {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--white);
+  line-height: 1;
+  text-align: center;
+  width: 100%;
+}
+
+.today__day.emotion-joyful .today__day-emotion {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='20' fill='%2334A853'/%3E%3Cpath d='M 12 15 Q 15 18 18 15' stroke='%2319191B' stroke-width='1.7' fill='none' stroke-linecap='round'/%3E%3Cpath d='M 22 15 Q 25 18 28 15' stroke='%2319191B' stroke-width='1.7' fill='none' stroke-linecap='round'/%3E%3Cpath d='M 12 25 Q 20 32 28 25' stroke='%2319191B' stroke-width='1.7' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='30' cy='15' r='1' fill='%23FFD527'/%3E%3C/svg%3E");
+}
+
+.today__day.emotion-good .today__day-emotion {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='20' fill='%235CDE6D'/%3E%3Ccircle cx='15' cy='17' r='2' fill='%2319191B'/%3E%3Ccircle cx='25' cy='17' r='2' fill='%2319191B'/%3E%3Cpath d='M 15 25 Q 20 28 25 25' stroke='%2319191B' stroke-width='1.7' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='10' cy='23' r='3' fill='%23FFB3D1' opacity='0.4'/%3E%3Ccircle cx='30' cy='23' r='3' fill='%23FFB3D1' opacity='0.4'/%3E%3C/svg%3E");
+}
+
+.today__day.emotion-so-so .today__day-emotion {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23FFD527'/%3E%3Cpath d='M 13 17 L 17 17' stroke='%2319191B' stroke-width='1.7' stroke-linecap='round'/%3E%3Cpath d='M 23 17 L 27 17' stroke='%2319191B' stroke-width='1.7' stroke-linecap='round'/%3E%3Cpath d='M 15 25 Q 20 23 25 25' stroke='%2319191B' stroke-width='1.7' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+.today__day.emotion-anxious .today__day-emotion {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23FF7DB0'/%3E%3Cellipse cx='15' cy='17' rx='1.5' ry='3' fill='%2319191B'/%3E%3Cellipse cx='25' cy='17' rx='1.5' ry='3' fill='%2319191B'/%3E%3Cellipse cx='20' cy='25' rx='4' ry='2' fill='%2319191B'/%3E%3C/svg%3E");
+}
+
+.today__day.emotion-sad .today__day-emotion {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='20' fill='%234285F4'/%3E%3Cpath d='M 12 15 Q 15 18 18 15' stroke='%2319191B' stroke-width='1.3' fill='none' stroke-linecap='round'/%3E%3Cpath d='M 22 15 Q 25 18 28 15' stroke='%2319191B' stroke-width='1.3' fill='none' stroke-linecap='round'/%3E%3Cpath d='M 15 28 Q 20 23 25 28' stroke='%2319191B' stroke-width='1.7' fill='none' stroke-linecap='round'/%3E%3Cellipse cx='12' cy='22' rx='1' ry='3' fill='%234285F4'/%3E%3Cellipse cx='28' cy='22' rx='1' ry='3' fill='%234285F4'/%3E%3C/svg%3E");
+}
+
+.today__day.emotion-bad .today__day-emotion {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23E74639'/%3E%3Cpath d='M 10 13 L 16 16' stroke='%2319191B' stroke-width='1.7' stroke-linecap='round'/%3E%3Cpath d='M 24 16 L 30 13' stroke='%2319191B' stroke-width='1.7' stroke-linecap='round'/%3E%3Ccircle cx='15' cy='18' r='1.5' fill='%2319191B'/%3E%3Ccircle cx='25' cy='18' r='1.5' fill='%2319191B'/%3E%3Cpath d='M 15 28 Q 20 23 25 28' stroke='%2319191B' stroke-width='1.7' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+.today__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+.today__card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 100%;
+  height: 80px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding-right: 16px;
+  transition: background-color 0.2s;
+}
+
+.today__card:active {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.today__card img:first-child {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px 0 0 8px;
+  flex-shrink: 0;
+}
+
+.today__card-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  margin-left: 24px;
+  gap: 0px;
+}
+
+.today__card-title {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  color: var(--white);
+}
+
+.today__card-subtitle {
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 16px;
+}
+
+.today__card-arrow {
+  width: 5px;
+  height: 10px;
+  margin-left: 16px;
+}
+
+/* фон */
+.mood-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  z-index: 9999;
+}
+
+/* окно */
+.mood-modal {
+  width: min(420px, calc(100vw - 48px));
+  border-radius: 24px;
+  background: rgba(44, 44, 44, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  padding: 16px;
+}
+
+.mood-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.mood-modal__title {
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.65);
+  text-transform: uppercase;
+}
+
+.mood-modal__close {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.mood-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.mood-card {
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 16px;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.mood-card__icon {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.mood-card__label {
+  font-size: 18px;
+  color: #fff;
+  font-weight: 600;
+}
+
+.mood-card[data-emotion="joyful"] .mood-card__icon {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='20' fill='%2334A853'/%3E%3Cpath d='M 12 15 Q 15 18 18 15' stroke='%2319191B' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M 22 15 Q 25 18 28 15' stroke='%2319191B' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M 12 25 Q 20 32 28 25' stroke='%2319191B' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='30' cy='15' r='1' fill='%23FFD527'/%3E%3C/svg%3E");
+}
+
+.mood-card[data-emotion="good"] .mood-card__icon {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='20' fill='%235CDE6D'/%3E%3Ccircle cx='15' cy='17' r='2' fill='%2319191B'/%3E%3Ccircle cx='25' cy='17' r='2' fill='%2319191B'/%3E%3Cpath d='M 15 25 Q 20 28 25 25' stroke='%2319191B' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='10' cy='23' r='3' fill='%23FFB3D1' opacity='0.4'/%3E%3Ccircle cx='30' cy='23' r='3' fill='%23FFB3D1' opacity='0.4'/%3E%3C/svg%3E");
+}
+
+.mood-card[data-emotion="so-so"] .mood-card__icon {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23FFD527'/%3E%3Cpath d='M 13 17 L 17 17' stroke='%2319191B' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M 23 17 L 27 17' stroke='%2319191B' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M 15 25 Q 20 23 25 25' stroke='%2319191B' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+.mood-card[data-emotion="anxious"] .mood-card__icon {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23FF7DB0'/%3E%3Cellipse cx='15' cy='17' rx='1.5' ry='3' fill='%2319191B'/%3E%3Cellipse cx='25' cy='17' rx='1.5' ry='3' fill='%2319191B'/%3E%3Cellipse cx='20' cy='25' rx='4' ry='2' fill='%2319191B'/%3E%3C/svg%3E");
+}
+
+.mood-card[data-emotion="sad"] .mood-card__icon {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='20' fill='%234285F4'/%3E%3Cpath d='M 12 15 Q 15 18 18 15' stroke='%2319191B' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3Cpath d='M 22 15 Q 25 18 28 15' stroke='%2319191B' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3Cpath d='M 15 28 Q 20 23 25 28' stroke='%2319191B' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3Cellipse cx='12' cy='22' rx='1' ry='3' fill='%234285F4'/%3E%3Cellipse cx='28' cy='22' rx='1' ry='3' fill='%234285F4'/%3E%3C/svg%3E");
+}
+
+.mood-card[data-emotion="bad"] .mood-card__icon {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23E74639'/%3E%3Cpath d='M 10 13 L 16 16' stroke='%2319191B' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M 24 16 L 30 13' stroke='%2319191B' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='15' cy='18' r='1.5' fill='%2319191B'/%3E%3Ccircle cx='25' cy='18' r='1.5' fill='%2319191B'/%3E%3Cpath d='M 15 28 Q 20 23 25 28' stroke='%2319191B' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+@keyframes emotionPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(52, 168, 83, 0.4);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 3px rgba(52, 168, 83, 0.2);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(52, 168, 83, 0);
+  }
+}

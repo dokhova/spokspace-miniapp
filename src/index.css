@@ -1,0 +1,54 @@
+:root {
+  --main: #212121;
+  --white: #ffffff;
+  --text-2: #b3b3b3;
+  --green: #34a853;
+  --yellow: #ffd527;
+  --blue: #4285f4;
+
+  --max-w: 375px;
+  --pad-x: 24px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--main);
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--white);
+}
+
+#root {
+  min-height: 100%;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}

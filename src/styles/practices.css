@@ -1,0 +1,137 @@
+/* ===== Language Switcher ===== */
+
+/* ===== Header (fixed) ===== */
+.header {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: var(--max-w);
+  width: 100%;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--main);
+  padding: 24px;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 32px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  border: none;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+.back-button:active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.back-arrow {
+  width: 16px;
+  height: 16px;
+  color: var(--white);
+}
+
+/* ===== Page container ===== */
+.practices {
+  max-width: var(--max-w);
+  margin: 0 auto;
+}
+
+/* ===== Sections ===== */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.section + .section {
+  margin-top: 48px;
+}
+
+.section-title {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+/* ===== Cards list ===== */
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ===== Card ===== */
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+
+  width: 100%;
+  height: 80px;
+
+  padding-right: 16px;
+  transition: background-color 0.2s;
+}
+
+.card:active {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.card img:first-child {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 12px 0 0 12px;
+  flex-shrink: 0;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  flex: 1;
+  min-width: 0;
+  margin-left: 24px;
+  gap: 0px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  color: var(--white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-subtitle {
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card .arrow {
+  width: 5px;
+  height: 10px;
+  margin-left: 16px;
+}
+
+/* ===== Bottom Tab Bar (fixed) ===== */

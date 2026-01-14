@@ -1,0 +1,564 @@
+.player {
+  position: fixed;
+  inset: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+    sans-serif;
+  color: rgba(255, 255, 255, 1);
+}
+
+.player__back {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  width: 40px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  z-index: 50;
+  color: rgba(255, 255, 255, 1);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.player__lang-switcher {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 50;
+  display: flex;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.player__lang-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: "Inter", sans-serif;
+}
+
+.player__lang-btn.active {
+  background: linear-gradient(135deg, #ffd527 8%, #34a853 85%, #4285f4 98%);
+  color: white;
+}
+
+.player__lang-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.player__lang-btn.active:hover {
+  background: linear-gradient(135deg, #ffd527 8%, #34a853 85%, #4285f4 98%);
+}
+
+.player__back:active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.player__back:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.player__center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.player__hint {
+  font-size: 12px;
+  line-height: 18px;
+  opacity: 0.85;
+}
+
+.player__controls {
+  position: absolute;
+  left: 50%;
+  bottom: 15%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 20;
+}
+
+.player--breathing .player__controls {
+  bottom: 5%;
+}
+
+.player__btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 1);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.player__btn:active {
+  transform: scale(0.98);
+}
+
+.player__btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.player__btn--ghost {
+  opacity: 0.7;
+}
+
+.player__completion {
+  position: absolute;
+  left: 50%;
+  bottom: 20%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 30;
+}
+
+.player__completionText {
+  font-size: 12px;
+  line-height: 18px;
+  margin-bottom: 4px;
+  opacity: 0.95;
+}
+
+.player__completionPraise {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+}
+
+.player__btn--pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    transform: scale(1.05);
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+}
+
+.player__meditation {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.player__cosmic {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.player__cosmic-stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.player__cosmic-star {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  animation: starTwinkle 8s ease-in-out infinite;
+  animation-play-state: paused;
+}
+
+.player__cosmic-star--1 {
+  left: 18%;
+  top: 28%;
+}
+
+.player__cosmic-star--2 {
+  left: 78%;
+  top: 32%;
+}
+
+.player__cosmic-star--3 {
+  left: 30%;
+  top: 68%;
+}
+
+.player__cosmic-star--4 {
+  left: 72%;
+  top: 70%;
+}
+
+.player__cosmic-star--5 {
+  left: 50%;
+  top: 18%;
+}
+
+.player__cosmic-star--6 {
+  left: 84%;
+  top: 58%;
+}
+
+.player__cosmic-glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 420px;
+  height: 420px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--cosmic-glow-1, rgba(255, 213, 39, 0.5)) 0%,
+    var(--cosmic-glow-2, rgba(255, 213, 39, 0.15)) 55%,
+    rgba(255, 213, 39, 0) 100%
+  );
+  opacity: 0.5;
+  animation: cosmicGlow 8s ease-in-out infinite;
+  animation-play-state: paused;
+}
+
+.player__cosmic-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 280px;
+  height: 280px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--cosmic-core, #ffd527);
+  opacity: 0.7;
+  animation: cosmicCircle 8s ease-in-out infinite;
+  animation-play-state: paused;
+}
+
+.player__cosmic-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid var(--cosmic-ring, rgba(255, 213, 39, 0.35));
+  animation: cosmicWave 8s ease-in-out infinite;
+  animation-play-state: paused;
+}
+
+.player__cosmic-ring--1 {
+  width: 360px;
+  height: 360px;
+  animation-delay: 0s;
+}
+
+.player__cosmic-ring--2 {
+  width: 460px;
+  height: 460px;
+  animation-delay: 2s;
+}
+
+.player__cosmic-ring--3 {
+  width: 560px;
+  height: 560px;
+  animation-delay: 4s;
+}
+
+.player__cosmic.is-running .player__cosmic-glow,
+.player__cosmic.is-running .player__cosmic-core,
+.player__cosmic.is-running .player__cosmic-ring,
+.player__cosmic.is-running .player__cosmic-star {
+  animation-play-state: running;
+}
+
+@keyframes cosmicGlow {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes cosmicCircle {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.12);
+    opacity: 1;
+  }
+}
+
+@keyframes cosmicWave {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes starTwinkle {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.player__waves {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  --player-wave: rgba(220, 255, 220, 0.5);
+  --player-dot: rgba(255, 255, 255, 0.7);
+}
+
+.player__wave {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  transform-origin: center;
+  transform: translate(-50%, -50%);
+  background-color: var(--player-wave);
+  animation: expand 15s ease-in-out infinite;
+  animation-play-state: paused;
+}
+
+.player__wave--2 {
+  animation-delay: 3s;
+}
+
+.player__wave--3 {
+  animation-delay: 6s;
+}
+
+.player__wave--4 {
+  animation-delay: 9s;
+}
+
+.player__wave--5 {
+  animation-delay: 12s;
+}
+
+.player__waves.is-running .player__wave {
+  animation-play-state: running;
+}
+
+.player__dot {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background-color: var(--player-dot);
+  border-radius: 50%;
+}
+
+.player__dot--1 {
+  left: 18%;
+  top: 28%;
+}
+
+.player__dot--2 {
+  left: 76%;
+  top: 30%;
+}
+
+.player__dot--3 {
+  left: 70%;
+  top: 72%;
+}
+
+.player__dot--4 {
+  left: 24%;
+  top: 70%;
+}
+
+.player__dot--5 {
+  left: 50%;
+  top: 20%;
+}
+
+.player__dot--6 {
+  left: 84%;
+  top: 58%;
+}
+
+.player__dot--7 {
+  left: 14%;
+  top: 52%;
+}
+
+.player__dot--8 {
+  left: 58%;
+  top: 84%;
+}
+
+@keyframes expand {
+  0% {
+    transform: translate(-50%, -50%) scale(5);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.1);
+    opacity: 0.9;
+  }
+}
+
+.breath {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.breath__circles {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(var(--breath-scale, 0.7));
+  width: 300px;
+  height: 300px;
+}
+
+.breath__circle {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  border-radius: 999px;
+}
+
+.breath__circle--outer {
+  width: 300px;
+  height: 300px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.breath__circle--middle {
+  width: 230px;
+  height: 230px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.breath__circle--inner {
+  width: 160px;
+  height: 160px;
+  background: var(--breath-core, rgba(255, 255, 255, 0.05));
+  border: 3px solid rgba(255, 255, 255, 0.75);
+}
+
+.breath__phase {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+}
+
+.breath__cycle {
+  position: absolute;
+  left: 50%;
+  bottom: 20%;
+  transform: translateX(-50%);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.breath__stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.breath__star {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  clip-path: polygon(
+    50% 0%,
+    61% 38%,
+    100% 38%,
+    69% 59%,
+    80% 100%,
+    50% 74%,
+    20% 100%,
+    31% 59%,
+    0% 38%,
+    39% 38%
+  );
+}
+
+.breath__star--1 {
+  left: 30%;
+  top: 18%;
+  opacity: 0.5;
+}
+
+.breath__star--2 {
+  left: 66%;
+  top: 20%;
+  opacity: 0.65;
+}
+
+.breath__star--3 {
+  left: 50%;
+  top: 10%;
+  opacity: 0.4;
+}
+
+.breath__star--4 {
+  left: 22%;
+  top: 68%;
+  opacity: 0.55;
+}
+
+.breath__star--5 {
+  left: 72%;
+  top: 70%;
+  opacity: 0.6;
+}
+
+.breath__star--6 {
+  left: 56%;
+  top: 82%;
+  opacity: 0.4;
+}

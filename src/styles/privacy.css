@@ -1,0 +1,128 @@
+.privacy {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding-bottom: 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.privacy__header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.privacy__title {
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 600;
+  color: var(--white);
+  margin: 0;
+}
+
+.privacy__badge {
+  background-color: rgba(52, 168, 83, 0.1);
+  color: var(--green);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
+  display: inline-block;
+  align-self: flex-start;
+}
+
+.privacy__section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.privacy__section-title {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--white);
+  margin: 0;
+}
+
+.privacy__subsection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.privacy__subsection-title {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--text-2);
+  margin: 0;
+}
+
+.privacy__text {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  color: var(--text-2);
+  margin: 0;
+}
+
+.privacy__text .highlight-text {
+  color: var(--white);
+  font-weight: 600;
+}
+
+.privacy__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.privacy__list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  color: var(--text-2);
+}
+
+.privacy__bullet {
+  color: var(--green);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.privacy__contact {
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.privacy__contact-title {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.privacy__contact-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  color: var(--text-2);
+}
+
+.privacy__emoji {
+  font-size: 16px;
+}

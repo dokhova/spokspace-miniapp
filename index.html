@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/img/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#212121" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Spokspace</title>
+    <meta name="title" content="Spokspace" />
+    <meta
+      name="description"
+      content="Digital wellbeing ecosystem"
+    />
+    <meta property="og:title" content="Spokspace" />
+    <meta property="og:site_name" content="Spokspace" />
+    <meta
+      property="og:description"
+      content="Digital wellbeing ecosystem"
+    />
+    <meta property="og:image" content="/img/logo.jpg" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:title" content="Spokspace" />
+    <meta
+      name="twitter:description"
+      content="Digital wellbeing ecosystem"
+    />
+    <meta name="twitter:image" content="/img/logo.jpg" />
+
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4834XVE45Z"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-4834XVE45Z', {
+        custom_map: {
+          'custom_parameter_1': 'telegram_user_id',
+          'custom_parameter_2': 'practice_type'
+        }
+      });
+    </script>
+
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- Telegram Analytics SDK -->
+    <script async src="https://tganalytics.xyz/index.js" onload="initAnalytics()" type="text/javascript"></script>
+
+    <script>
+      window.telegramAnalyticsReady = false;
+
+      function initAnalytics() {
+        window.telegramAnalytics.init({
+          token: 'eyJhcHBfbmFtZSI6InNwb2tzcGFjZV9taW5pYXBwIiwiYXBwX3VybCI6Imh0dHBzOi8vdC5tZS9zcG9rc3BhY2Vib3QiLCJhcHBfZG9tYWluIjoiaHR0cHM6Ly93d3cuc3Bva3NwYWNlLmNvbSJ9!lFfIwgzlTn6nLOr9lypkmjfCVI8vz3h36Dsor4dISRw=',
+          appName: 'spokspace_miniapp'
+        });
+
+        window.telegramAnalyticsReady = true;
+
+        if (window.telegramAnalytics && typeof window.telegramAnalytics.track === 'function') {
+          window.telegramAnalytics.track('app_initialized', {
+            timestamp: Date.now(),
+            page: 'index',
+            version: '1.0.0'
+          });
+        }
+
+        if (window.pendingAnalyticsEvents && window.pendingAnalyticsEvents.length > 0) {
+          window.pendingAnalyticsEvents.forEach(({eventName, parameters}) => {
+            trackEvent(eventName, parameters);
+          });
+          window.pendingAnalyticsEvents = [];
+        }
+      }
+
+      window.pendingAnalyticsEvents = [];
+
+      function trackEvent(eventName, parameters = {}) {
+        fastAnalytics.track(eventName, parameters);
+      }
+
+      class FastAnalytics {
+        constructor() {
+          this.eventQueue = [];
+          this.batchSize = 5;
+          this.batchDelay = 1000;
+          this.processingBatch = false;
+
+          this.startBatchProcessor();
+        }
+
+        track(eventName, parameters = {}) {
+          const eventData = {
+            eventName,
+            parameters: {
+              ...parameters,
+              timestamp: Date.now(),
+              app_name: 'spokspace_miniapp',
+              page: window.location.pathname
+            }
+          };
+
+          this.eventQueue.push(eventData);
+
+          if (this.eventQueue.length >= this.batchSize && !this.processingBatch) {
+            this.processBatch();
+          }
+        }
+
+        startBatchProcessor() {
+          setInterval(() => {
+            if (this.eventQueue.length > 0 && !this.processingBatch) {
+              this.processBatch();
+            }
+          }, this.batchDelay);
+        }
+
+        async processBatch() {
+          if (this.processingBatch || this.eventQueue.length === 0) return;
+
+          this.processingBatch = true;
+          const batch = this.eventQueue.splice(0, this.batchSize);
+
+          for (const event of batch) {
+            try {
+              await this.sendEvent(event.eventName, event.parameters);
+            } catch (error) {
+              console.error('Analytics error:', error);
+            }
+          }
+
+          this.processingBatch = false;
+        }
+
+        async sendEvent(eventName, parameters) {
+          if (window.telegramAnalyticsReady && window.telegramAnalytics?.track) {
+            try {
+              window.telegramAnalytics.track(eventName, parameters);
+            } catch (error) {
+              console.error('Telegram Analytics error:', error);
+            }
+          }
+
+          if (typeof gtag !== 'undefined') {
+            try {
+              gtag('event', eventName, {
+                event_category: 'telegram_mini_app',
+                event_label: parameters.practice_type || 'unknown',
+                custom_parameter_1: parameters.user_id,
+                custom_parameter_2: parameters.practice_type,
+                value: 1
+              });
+            } catch (error) {
+              console.error('Google Analytics error:', error);
+            }
+          }
+        }
+      }
+
+      const fastAnalytics = new FastAnalytics();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
