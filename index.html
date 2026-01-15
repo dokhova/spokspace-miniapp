@@ -28,42 +28,61 @@
     />
     <meta name="twitter:image" content="/img/logo.jpg" />
 
-    <!-- Google Analytics 4 -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4834XVE45Z"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-4834XVE45Z', {
-        custom_map: {
-          'custom_parameter_1': 'telegram_user_id',
-          'custom_parameter_2': 'practice_type'
-        }
-      });
-    </script>
-
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-    <!-- Telegram Analytics SDK -->
-    <script async src="https://tganalytics.xyz/index.js" onload="initAnalytics()" type="text/javascript"></script>
-
     <script>
+      const GA_MEASUREMENT_ID = "%VITE_GA_MEASUREMENT_ID%";
+      const TELEGRAM_ANALYTICS_TOKEN = "%VITE_TELEGRAM_ANALYTICS_TOKEN%";
+      const ANALYTICS_ENABLED = Boolean(
+        GA_MEASUREMENT_ID || TELEGRAM_ANALYTICS_TOKEN
+      );
+
+      function loadScript(src, onload) {
+        const script = document.createElement("script");
+        script.async = true;
+        script.src = src;
+        if (onload) script.onload = onload;
+        document.head.appendChild(script);
+      }
+
+      if (GA_MEASUREMENT_ID) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+          window.dataLayer.push(arguments);
+        }
+        window.gtag = gtag;
+        gtag("js", new Date());
+        gtag("config", GA_MEASUREMENT_ID, {
+          custom_map: {
+            custom_parameter_1: "telegram_user_id",
+            custom_parameter_2: "practice_type",
+          },
+        });
+        loadScript(
+          `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`
+        );
+      }
+
       window.telegramAnalyticsReady = false;
 
       function initAnalytics() {
+        if (!window.telegramAnalytics?.init) return;
         window.telegramAnalytics.init({
-          token: 'eyJhcHBfbmFtZSI6InNwb2tzcGFjZV9taW5pYXBwIiwiYXBwX3VybCI6Imh0dHBzOi8vdC5tZS9zcG9rc3BhY2Vib3QiLCJhcHBfZG9tYWluIjoiaHR0cHM6Ly93d3cuc3Bva3NwYWNlLmNvbSJ9!lFfIwgzlTn6nLOr9lypkmjfCVI8vz3h36Dsor4dISRw=',
-          appName: 'spokspace_miniapp'
+          token: TELEGRAM_ANALYTICS_TOKEN,
+          appName: "spokspace_miniapp",
         });
 
         window.telegramAnalyticsReady = true;
 
-        if (window.telegramAnalytics && typeof window.telegramAnalytics.track === 'function') {
-          window.telegramAnalytics.track('app_initialized', {
+        if (
+          window.telegramAnalytics &&
+          typeof window.telegramAnalytics.track === "function"
+        ) {
+          window.telegramAnalytics.track("app_initialized", {
             timestamp: Date.now(),
-            page: 'index',
-            version: '1.0.0'
+            page: "index",
+            version: "1.0.0",
           });
         }
 
@@ -78,7 +97,9 @@
       window.pendingAnalyticsEvents = [];
 
       function trackEvent(eventName, parameters = {}) {
-        fastAnalytics.track(eventName, parameters);
+        if (ANALYTICS_ENABLED) {
+          fastAnalytics.track(eventName, parameters);
+        }
       }
 
       class FastAnalytics {
@@ -139,27 +160,31 @@
             try {
               window.telegramAnalytics.track(eventName, parameters);
             } catch (error) {
-              console.error('Telegram Analytics error:', error);
+              console.error("Telegram Analytics error:", error);
             }
           }
 
-          if (typeof gtag !== 'undefined') {
+          if (typeof gtag !== "undefined") {
             try {
-              gtag('event', eventName, {
-                event_category: 'telegram_mini_app',
-                event_label: parameters.practice_type || 'unknown',
+              gtag("event", eventName, {
+                event_category: "telegram_mini_app",
+                event_label: parameters.practice_type || "unknown",
                 custom_parameter_1: parameters.user_id,
                 custom_parameter_2: parameters.practice_type,
-                value: 1
+                value: 1,
               });
             } catch (error) {
-              console.error('Google Analytics error:', error);
+              console.error("Google Analytics error:", error);
             }
           }
         }
       }
 
       const fastAnalytics = new FastAnalytics();
+
+      if (TELEGRAM_ANALYTICS_TOKEN) {
+        loadScript("https://tganalytics.xyz/index.js", initAnalytics);
+      }
     </script>
   </head>
   <body>
