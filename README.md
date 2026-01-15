@@ -54,4 +54,4 @@ See `.env.example`.
 - `npm run preview` — preview the production build.
 
 ## License
-License: MIT (to be added).
+MIT.
