@@ -1,22 +1,34 @@
 import { useMemo } from "react";
+import type { ReactNode } from "react";
 import "../styles/privacy.css";
 import { useLang } from "../i18n/lang";
 
 type Section = {
   title: string;
-  paragraphs?: Array<string | JSX.Element>;
+  paragraphs?: Array<string | ReactNode>;
   subsections?: Array<{
     title: string;
-    paragraphs?: Array<string | JSX.Element>;
+    paragraphs?: Array<string | ReactNode>;
     list?: string[];
   }>;
   list?: string[];
 };
 
+type PrivacyContent = {
+  title: string;
+  updated: string;
+  sections: Section[];
+  contact: {
+    title: string;
+    email: string;
+    telegram: string;
+  };
+};
+
 export default function Privacy() {
   const { lang } = useLang();
 
-  const content = useMemo(() => {
+  const content = useMemo<PrivacyContent>(() => {
     if (lang === "ru") {
       return {
         title: "Условия использования",
