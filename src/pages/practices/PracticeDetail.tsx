@@ -622,7 +622,7 @@ export default function PracticeDetail() {
               to={`/practice/${p.slug}`}
               className="practice-card"
             >
-              <img src={p.image} alt={p.title} />
+              <img src={p.image} alt={pick(p.title, lang) ?? ""} />
               <div className="practice-card-content">
                 <div className="practice-card-title">
                   {pick(p.title, lang)}
