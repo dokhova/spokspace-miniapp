@@ -1,73 +1,57 @@
-# React + TypeScript + Vite
+# Spokspace Miniapp
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A Telegram Mini App for short breathing and meditation practices with a lightweight mood check-in flow, designed for quick sessions on mobile.
 
-Currently, two official plugins are available:
+## Features
+- Practices library (breathing + meditation) with short audio sessions.
+- Practice player with breathing cycles and guided audio.
+- RU/EN интерфейс (i18n).
+- Mood check-in calendar stored in localStorage.
+- Calm Dots mini-game with best score tracking.
+- Telegram WebApp integration (user profile + header/background setup).
+- Responsive layout optimized for Telegram Mini Apps.
+- Optional analytics IDs via env (GA4 + Telegram Analytics).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tech stack
+React, TypeScript, Vite, react-router-dom, ESLint.
 
-## React Compiler
+## Quick start
+```
+npm install
+npm run dev
+```
+Open `http://localhost:5173` in your browser.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Build:
+```
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Environment variables
+See `.env.example`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- `VITE_GA_MEASUREMENT_ID` (optional)
+- `VITE_TELEGRAM_ANALYTICS_TOKEN` (optional)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Project structure
+- `src/pages` — pages and screens.
+- `src/pages/practices` — practice config and player screens.
+- `src/i18n` — language data and helpers.
+- `src/styles` — global and page styles.
+- `public/img` — images and icons.
+- `public/audio` — practice audio assets.
+
+## How to add a new practice
+1) Add a new entry in `src/pages/practices/practiceConfig.ts` with a unique `slug`, `title`, `subtitle`, `tags`, and `audio`.
+2) Add preview images to `public/img` and audio files to `public/audio`.
+3) Update the `other` list for related cards where needed.
+4) Run `npm run dev` and open `/practice/<slug>` and `/practice/<slug>/play` to verify content.
+
+## Scripts
+- `npm run dev` — start local dev server.
+- `npm run build` — typecheck and build for production.
+- `npm run lint` — run ESLint.
+- `npm run preview` — preview the production build.
+
+## License
+License: MIT (to be added).
