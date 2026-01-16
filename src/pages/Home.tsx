@@ -18,14 +18,7 @@ type DisplayUser = {
   isGuest: boolean;
 };
 
-const EMOTIONS: Emotion[] = [
-  "joyful",
-  "good",
-  "so-so",
-  "anxious",
-  "sad",
-  "bad",
-];
+const EMOTIONS: Emotion[] = ["joyful", "good", "so-so", "anxious", "sad", "bad"];
 
 const STORAGE_KEY = "spokspaceEmotions";
 const GUEST_KEY = "spokspaceGuestProfile";
@@ -82,24 +75,8 @@ function getMonthNames(lang: "en" | "ru") {
 function formatSelectedDate(date: Date, lang: "en" | "ru") {
   const dayNames =
     lang === "ru"
-      ? [
-          "ВОСКРЕСЕНЬЕ",
-          "ПОНЕДЕЛЬНИК",
-          "ВТОРНИК",
-          "СРЕДА",
-          "ЧЕТВЕРГ",
-          "ПЯТНИЦА",
-          "СУББОТА",
-        ]
-      : [
-          "SUNDAY",
-          "MONDAY",
-          "TUESDAY",
-          "WEDNESDAY",
-          "THURSDAY",
-          "FRIDAY",
-          "SATURDAY",
-        ];
+      ? ["ВОСКРЕСЕНЬЕ", "ПОНЕДЕЛЬНИК", "ВТОРНИК", "СРЕДА", "ЧЕТВЕРГ", "ПЯТНИЦА", "СУББОТА"]
+      : ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
 
   const monthNames =
     lang === "ru"
@@ -215,9 +192,7 @@ export default function Home() {
       tg.MainButton?.hide?.();
       const tgUser = tg.initDataUnsafe?.user as TelegramUser | undefined;
       if (tgUser) {
-        const name = [tgUser.first_name, tgUser.last_name]
-          .filter(Boolean)
-          .join(" ");
+        const name = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ");
         setUser({
           name: name || "User",
           photoUrl: tgUser.photo_url,
@@ -266,11 +241,7 @@ export default function Home() {
     const days: { date: Date; isCurrentMonth: boolean }[] = [];
 
     if (isExpanded) {
-      displayDate = new Date(
-        today.getFullYear(),
-        today.getMonth() + currentMonthOffset,
-        1
-      );
+      displayDate = new Date(today.getFullYear(), today.getMonth() + currentMonthOffset, 1);
       const year = displayDate.getFullYear();
       const month = displayDate.getMonth();
 
@@ -288,7 +259,7 @@ export default function Home() {
       displayDate = new Date(
         today.getFullYear(),
         today.getMonth(),
-        today.getDate() + currentWeekOffset * 7
+        today.getDate() + currentWeekOffset * 7,
       );
       const currentDayOfWeek = (displayDate.getDay() + 6) % 7;
       const mondayOfCurrentWeek = new Date(displayDate);
@@ -385,9 +356,7 @@ export default function Home() {
 
         <div className="today__calendar">
           <div
-            className={`today__calendar-card${
-              isExpanded ? " today__calendar-card--expanded" : ""
-            }`}
+            className={`today__calendar-card${isExpanded ? " today__calendar-card--expanded" : ""}`}
           >
             <div className="today__calendar-header">
               <button
@@ -398,11 +367,7 @@ export default function Home() {
               >
                 ‹
               </button>
-              <button
-                className="today__month-display"
-                type="button"
-                onClick={handleToggleCalendar}
-              >
+              <button className="today__month-display" type="button" onClick={handleToggleCalendar}>
                 <div className="today__current-month">{currentMonthLabel}</div>
                 <img
                   src="/img/arrow.svg"
@@ -514,9 +479,7 @@ export default function Home() {
                     onClick={() => handleEmotionSelect(emotion)}
                   >
                     <div className="mood-card__icon" />
-                    <div className="mood-card__label">
-                      {strings.emotions[emotion]}
-                    </div>
+                    <div className="mood-card__label">{strings.emotions[emotion]}</div>
                   </button>
                 ))}
               </div>

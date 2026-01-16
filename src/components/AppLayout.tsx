@@ -19,9 +19,7 @@ export function AppLayout() {
   const isGameTab = location.pathname === "/game";
 
   // Назад показываем не на главных табах
-  const isRootTab =
-    location.pathname === "/" ||
-    location.pathname === "/today";
+  const isRootTab = location.pathname === "/" || location.pathname === "/today";
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
@@ -129,29 +127,17 @@ export function AppLayout() {
       </main>
 
       <nav className="tab-bar">
-        <a
-          className={`tab ${isTodayTab ? "active" : ""}`}
-          href="#/today"
-        >
+        <a className={`tab ${isTodayTab ? "active" : ""}`} href="#/today">
           <img src={isTodayTab ? "/img/home-active.svg" : "/img/home.svg"} alt="" />
           <div>{tUI("today", lang)}</div>
         </a>
 
-        <a
-          className={`tab ${isPracticesTab ? "active" : ""}`}
-          href="#/practices"
-        >
-          <img
-            src={isPracticesTab ? "/img/practices-active.svg" : "/img/practices.svg"}
-            alt=""
-          />
+        <a className={`tab ${isPracticesTab ? "active" : ""}`} href="#/practices">
+          <img src={isPracticesTab ? "/img/practices-active.svg" : "/img/practices.svg"} alt="" />
           <div>{tUI("practices", lang)}</div>
         </a>
 
-        <a
-          className={`tab ${isGameTab ? "active" : ""}`}
-          href="#/game"
-        >
+        <a className={`tab ${isGameTab ? "active" : ""}`} href="#/game">
           <img src={isGameTab ? "/img/game-active.svg" : "/img/game.svg"} alt="" />
           <div>{tUI("game", lang)}</div>
         </a>

@@ -51,13 +51,10 @@ export default function PracticePlayer() {
         hold2: 0,
         cycles: 1,
       };
-  const breathing = useBreathingEngine(
-    breathingConfig,
-    isRunning && isBreathing,
-    () => setStatus("done")
+  const breathing = useBreathingEngine(breathingConfig, isRunning && isBreathing, () =>
+    setStatus("done"),
   );
-  const audioSrc =
-    practice.kind === "breathing" ? practice.audio?.default : practice.audio?.[lang];
+  const audioSrc = practice.kind === "breathing" ? practice.audio?.default : practice.audio?.[lang];
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -76,10 +73,11 @@ export default function PracticePlayer() {
   }, [status, audioSrc]);
 
   useEffect(() => {
+    const audio = audioRef.current;
     return () => {
-      if (!audioRef.current) return;
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+      if (!audio) return;
+      audio.pause();
+      audio.currentTime = 0;
     };
   }, []);
 
@@ -119,10 +117,10 @@ export default function PracticePlayer() {
         breathing.phase === "inhale"
           ? minScale
           : breathing.phase === "hold"
-          ? maxScale
-          : breathing.phase === "exhale"
-          ? maxScale
-          : minScale;
+            ? maxScale
+            : breathing.phase === "exhale"
+              ? maxScale
+              : minScale;
       setScale(initialScale);
     }
 
@@ -135,8 +133,7 @@ export default function PracticePlayer() {
         breathStartRef.current = Date.now();
       }
 
-      const elapsed =
-        Date.now() - breathStartRef.current + breathOffsetRef.current;
+      const elapsed = Date.now() - breathStartRef.current + breathOffsetRef.current;
       const progress = Math.min(elapsed / duration, 1);
 
       let scale = minScale;
@@ -191,9 +188,12 @@ export default function PracticePlayer() {
   const playerBackground = practice.playerBackground ?? practice.previewBg;
   const isCosmic = practice.id === "stars" || practice.id === "place";
   const cosmicCore = practice.id === "stars" ? "#FFD527" : "#4285F4";
-  const cosmicRing = practice.id === "stars" ? "rgba(255, 213, 39, 0.35)" : "rgba(133, 183, 255, 0.35)";
-  const cosmicGlow1 = practice.id === "stars" ? "rgba(255, 213, 39, 0.5)" : "rgba(66, 133, 244, 0.45)";
-  const cosmicGlow2 = practice.id === "stars" ? "rgba(255, 213, 39, 0.18)" : "rgba(66, 133, 244, 0.18)";
+  const cosmicRing =
+    practice.id === "stars" ? "rgba(255, 213, 39, 0.35)" : "rgba(133, 183, 255, 0.35)";
+  const cosmicGlow1 =
+    practice.id === "stars" ? "rgba(255, 213, 39, 0.5)" : "rgba(66, 133, 244, 0.45)";
+  const cosmicGlow2 =
+    practice.id === "stars" ? "rgba(255, 213, 39, 0.18)" : "rgba(66, 133, 244, 0.18)";
 
   return (
     <div
@@ -261,13 +261,12 @@ export default function PracticePlayer() {
               {breathing.phase === "inhale"
                 ? tUI("inhale", lang)
                 : breathing.phase === "exhale"
-                ? tUI("exhale", lang)
-                : tUI("hold", lang)}
+                  ? tUI("exhale", lang)
+                  : tUI("hold", lang)}
             </div>
             {status !== "idle" && (
               <div className="breath__cycle">
-                {tUI("cycle", lang)} {breathing.cycle} {tUI("of", lang)}{" "}
-                {breathing.totalCycles}
+                {tUI("cycle", lang)} {breathing.cycle} {tUI("of", lang)} {breathing.totalCycles}
               </div>
             )}
           </div>
@@ -289,12 +288,7 @@ export default function PracticePlayer() {
           </div>
         ) : (
           <div className="player__meditation">
-            <div
-              className={[
-                "player__waves",
-                status === "running" ? "is-running" : "",
-              ].join(" ")}
-            >
+            <div className={["player__waves", status === "running" ? "is-running" : ""].join(" ")}>
               <div className="player__wave player__wave--1" />
               <div className="player__wave player__wave--2" />
               <div className="player__wave player__wave--3" />
@@ -316,10 +310,7 @@ export default function PracticePlayer() {
       {status !== "done" && (
         <div className="player__controls">
           {status === "idle" && (
-            <button
-              className="player__btn player__btn--pulse"
-              onClick={() => setStatus("running")}
-            >
+            <button className="player__btn player__btn--pulse" onClick={() => setStatus("running")}>
               {tUI("start", lang)}
             </button>
           )}
@@ -335,18 +326,13 @@ export default function PracticePlayer() {
               {tUI("continue", lang)}
             </button>
           )}
-
         </div>
       )}
 
       {status === "done" && (
         <div className="player__completion">
-          <div className="player__completionText">
-            {pick(practice.finishedText, lang)}
-          </div>
-          <div className="player__completionPraise">
-            {pick(practice.praiseText, lang)}
-          </div>
+          <div className="player__completionText">{pick(practice.finishedText, lang)}</div>
+          <div className="player__completionPraise">{pick(practice.praiseText, lang)}</div>
         </div>
       )}
     </div>

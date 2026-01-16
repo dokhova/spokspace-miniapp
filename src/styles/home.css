@@ -202,8 +202,8 @@
   height: 10px;
   display: inline-block;
   transition: transform 0.3s ease;
-  filter: brightness(0) saturate(100%) invert(71%) sepia(4%) saturate(135%)
-    hue-rotate(201deg) brightness(86%) contrast(86%);
+  filter: brightness(0) saturate(100%) invert(71%) sepia(4%) saturate(135%) hue-rotate(201deg)
+    brightness(86%) contrast(86%);
   transform: rotate(90deg);
 }
 

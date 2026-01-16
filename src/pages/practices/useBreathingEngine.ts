@@ -12,11 +12,7 @@ export type BreathingConfig = {
 
 type Step = { phase: BreathingPhase; seconds: number };
 
-export function useBreathingEngine(
-  cfg: BreathingConfig,
-  isRunning: boolean,
-  onDone: () => void
-) {
+export function useBreathingEngine(cfg: BreathingConfig, isRunning: boolean, onDone: () => void) {
   const steps: Step[] = useMemo(() => {
     const arr: Step[] = [];
     if (cfg.inhale > 0) arr.push({ phase: "inhale", seconds: cfg.inhale });

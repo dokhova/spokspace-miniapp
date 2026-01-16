@@ -147,11 +147,10 @@ export const practices: Record<string, Practice> = {
       { en: "5 MIN", ru: "5 МИН" },
     ],
     title: { en: "Mindful pauses", ru: "Осознанные паузы" },
-    subtitle:
-      {
-        en: "Stop for a moment to bring attention back to the present moment",
-        ru: "Остановитесь на мгновение, чтобы вернуть внимание в настоящий момент",
-      },
+    subtitle: {
+      en: "Stop for a moment to bring attention back to the present moment",
+      ru: "Остановитесь на мгновение, чтобы вернуть внимание в настоящий момент",
+    },
     cardTitle: { en: "Mindful pauses", ru: "Осознанные паузы" },
     cardSubtitle: { en: "Attention switching", ru: "Переключение внимания" },
     previewBg: "var(--yellow)",

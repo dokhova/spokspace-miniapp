@@ -62,9 +62,7 @@ export default function Profile() {
 
   const [user, setUser] = useState<DisplayUser | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(
-    null
-  );
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [toggles, setToggles] = useState<EmotionToggle>(() => {
     const raw = localStorage.getItem(TOGGLE_KEY);
     if (!raw) return { emotionCalendar: false };
@@ -80,9 +78,7 @@ export default function Profile() {
     if (tg) {
       const tgUser = tg.initDataUnsafe?.user as TelegramUser | undefined;
       if (tgUser) {
-        const name = [tgUser.first_name, tgUser.last_name]
-          .filter(Boolean)
-          .join(" ");
+        const name = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ");
         setUser({
           name: name || "User",
           photoUrl: tgUser.photo_url,
@@ -179,23 +175,15 @@ export default function Profile() {
       <button type="button" className="profile__nav" onClick={handleSupport}>
         <div className="profile__nav-content">
           <div className="profile__nav-title">{strings.support}</div>
-          <div className="profile__nav-subtitle">
-            {strings.supportSubtitle}
-          </div>
+          <div className="profile__nav-subtitle">{strings.supportSubtitle}</div>
         </div>
         <span className="profile__nav-arrow">›</span>
       </button>
 
-      <button
-        type="button"
-        className="profile__nav"
-        onClick={() => setShowNotifications(true)}
-      >
+      <button type="button" className="profile__nav" onClick={() => setShowNotifications(true)}>
         <div className="profile__nav-content">
           <div className="profile__nav-title">{strings.notifications}</div>
-          <div className="profile__nav-subtitle">
-            {strings.notificationsSubtitle}
-          </div>
+          <div className="profile__nav-subtitle">{strings.notificationsSubtitle}</div>
         </div>
         <span className="profile__nav-arrow">›</span>
       </button>
@@ -229,17 +217,9 @@ export default function Profile() {
                 ✕
               </button>
             </div>
-            <button
-              type="button"
-              className="profile__toggle-row"
-              onClick={toggleEmotion}
-            >
+            <button type="button" className="profile__toggle-row" onClick={toggleEmotion}>
               <span>{strings.emotionCalendar}</span>
-              <span
-                className={`profile__toggle${
-                  toggles.emotionCalendar ? " on" : ""
-                }`}
-              />
+              <span className={`profile__toggle${toggles.emotionCalendar ? " on" : ""}`} />
             </button>
             <div className="profile__note">{strings.stubNote}</div>
           </div>
