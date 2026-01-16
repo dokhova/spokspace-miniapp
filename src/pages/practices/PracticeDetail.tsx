@@ -30,9 +30,7 @@ export default function PracticeDetail() {
         {practice.tags.map((t, i) => (
           <span key={pick(t, lang)}>
             {pick(t, lang)}
-            {i < practice.tags.length - 1 ? (
-              <span className="dot"> • </span>
-            ) : null}
+            {i < practice.tags.length - 1 ? <span className="dot"> • </span> : null}
           </span>
         ))}
       </div>
@@ -45,8 +43,8 @@ export default function PracticeDetail() {
           practice.kind === "breathing"
             ? "breathing"
             : practice.id === "stars" || practice.id === "place"
-            ? "sleep"
-            : "meditation";
+              ? "sleep"
+              : "meditation";
 
         const previewStyle = {
           background: practice.previewBg ?? "rgba(255, 255, 255, 0.06)",
@@ -229,40 +227,40 @@ export default function PracticeDetail() {
                   },
                 }
               : practice.id === "4444"
-              ? {
-                  outer: {
-                    values: "50;75;75;50;50",
-                    dur: "16s",
-                    keyTimes: "0;0.25;0.5;0.75;1",
-                  },
-                  middle: {
-                    values: "40;60;60;40;40",
-                    dur: "16s",
-                    keyTimes: "0;0.25;0.5;0.75;1",
-                  },
-                  solid: {
-                    values: "30;45;45;30;30",
-                    dur: "16s",
-                    keyTimes: "0;0.25;0.5;0.75;1",
-                  },
-                }
-              : {
-                  outer: {
-                    values: "50;75;75;35;35;50",
-                    dur: "20s",
-                    keyTimes: "0;0.2;0.55;0.95;0.98;1",
-                  },
-                  middle: {
-                    values: "40;60;60;25;25;40",
-                    dur: "20s",
-                    keyTimes: "0;0.2;0.55;0.95;0.98;1",
-                  },
-                  solid: {
-                    values: "30;45;45;15;15;30",
-                    dur: "20s",
-                    keyTimes: "0;0.2;0.55;0.95;0.98;1",
-                  },
-                };
+                ? {
+                    outer: {
+                      values: "50;75;75;50;50",
+                      dur: "16s",
+                      keyTimes: "0;0.25;0.5;0.75;1",
+                    },
+                    middle: {
+                      values: "40;60;60;40;40",
+                      dur: "16s",
+                      keyTimes: "0;0.25;0.5;0.75;1",
+                    },
+                    solid: {
+                      values: "30;45;45;30;30",
+                      dur: "16s",
+                      keyTimes: "0;0.25;0.5;0.75;1",
+                    },
+                  }
+                : {
+                    outer: {
+                      values: "50;75;75;35;35;50",
+                      dur: "20s",
+                      keyTimes: "0;0.2;0.55;0.95;0.98;1",
+                    },
+                    middle: {
+                      values: "40;60;60;25;25;40",
+                      dur: "20s",
+                      keyTimes: "0;0.2;0.55;0.95;0.98;1",
+                    },
+                    solid: {
+                      values: "30;45;45;15;15;30",
+                      dur: "20s",
+                      keyTimes: "0;0.2;0.55;0.95;0.98;1",
+                    },
+                  };
 
           return (
             <svg
@@ -390,11 +388,7 @@ export default function PracticeDetail() {
               <defs>
                 <radialGradient id={glowId} cx="50%" cy="50%" r="50%">
                   <stop offset="0%" stopColor={accentSoft} stopOpacity="0.8" />
-                  <stop
-                    offset="70%"
-                    stopColor={accentSoft2}
-                    stopOpacity="0.3"
-                  />
+                  <stop offset="70%" stopColor={accentSoft2} stopOpacity="0.3" />
                   <stop offset="100%" stopColor={accent} stopOpacity="0" />
                 </radialGradient>
               </defs>
@@ -477,19 +471,8 @@ export default function PracticeDetail() {
                 </circle>
               </g>
 
-              <circle
-                cx="163.5"
-                cy="103.5"
-                r="50"
-                fill={`url(#${glowId})`}
-                opacity="0.5"
-              >
-                <animate
-                  attributeName="r"
-                  values="50;70;50"
-                  dur="16s"
-                  repeatCount="indefinite"
-                />
+              <circle cx="163.5" cy="103.5" r="50" fill={`url(#${glowId})`} opacity="0.5">
+                <animate attributeName="r" values="50;70;50" dur="16s" repeatCount="indefinite" />
                 <animate
                   attributeName="opacity"
                   values="0.5;0.8;0.5"
@@ -498,19 +481,8 @@ export default function PracticeDetail() {
                 />
               </circle>
 
-              <circle
-                cx="163.5"
-                cy="103.5"
-                r="35"
-                fill={accent}
-                opacity="0.7"
-              >
-                <animate
-                  attributeName="r"
-                  values="35;50;35"
-                  dur="16s"
-                  repeatCount="indefinite"
-                />
+              <circle cx="163.5" cy="103.5" r="35" fill={accent} opacity="0.7">
+                <animate attributeName="r" values="35;50;35" dur="16s" repeatCount="indefinite" />
                 <animate
                   attributeName="opacity"
                   values="0.7;1;0.7"
@@ -528,12 +500,7 @@ export default function PracticeDetail() {
                 strokeWidth="1.5"
                 opacity="0.6"
               >
-                <animate
-                  attributeName="r"
-                  values="40;100"
-                  dur="12s"
-                  repeatCount="indefinite"
-                />
+                <animate attributeName="r" values="40;100" dur="12s" repeatCount="indefinite" />
                 <animate
                   attributeName="opacity"
                   values="0.6;0"
@@ -603,8 +570,8 @@ export default function PracticeDetail() {
             {previewKind === "breathing"
               ? renderBreathingPreview()
               : previewKind === "sleep"
-              ? renderSleepPreview()
-              : renderMeditationPreview()}
+                ? renderSleepPreview()
+                : renderMeditationPreview()}
             <span className="preview__play">
               <span className="preview__playIcon">▶</span>
             </span>
@@ -617,19 +584,11 @@ export default function PracticeDetail() {
 
         <div className="other-list">
           {practice.other.map((p) => (
-            <Link
-              key={p.slug}
-              to={`/practice/${p.slug}`}
-              className="practice-card"
-            >
+            <Link key={p.slug} to={`/practice/${p.slug}`} className="practice-card">
               <img src={p.image} alt={pick(p.title, lang) ?? ""} />
               <div className="practice-card-content">
-                <div className="practice-card-title">
-                  {pick(p.title, lang)}
-                </div>
-                <div className="practice-card-subtitle">
-                  {pick(p.subtitle, lang)}
-                </div>
+                <div className="practice-card-title">{pick(p.title, lang)}</div>
+                <div className="practice-card-subtitle">{pick(p.subtitle, lang)}</div>
               </div>
               <img className="arrow" src="/img/arrow.svg" alt="" />
             </Link>

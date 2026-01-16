@@ -60,9 +60,7 @@ export default function Game() {
         };
   }, [lang]);
 
-  const [grid, setGrid] = useState<Color[]>(() =>
-    Array.from({ length: GRID * GRID }, randColor)
-  );
+  const [grid, setGrid] = useState<Color[]>(() => Array.from({ length: GRID * GRID }, randColor));
 
   const [movesLeft, setMovesLeft] = useState(MOVES_TOTAL);
   const [score, setScore] = useState(0);
@@ -89,9 +87,7 @@ export default function Game() {
   function getDotCenter(idx: number): { x: number; y: number } | null {
     const board = boardRef.current;
     if (!board) return null;
-    const el = board.querySelector(
-      `[data-dot-index="${idx}"]`
-    ) as HTMLElement | null;
+    const el = board.querySelector(`[data-dot-index="${idx}"]`) as HTMLElement | null;
     if (!el) return null;
 
     const b = board.getBoundingClientRect();
@@ -123,9 +119,10 @@ export default function Game() {
 
     if (path.length < 2) return;
 
-    const points = path
-      .map((idx) => getDotCenter(idx))
-      .filter(Boolean) as { x: number; y: number }[];
+    const points = path.map((idx) => getDotCenter(idx)).filter(Boolean) as {
+      x: number;
+      y: number;
+    }[];
 
     if (points.length < 2) return;
 

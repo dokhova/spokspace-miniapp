@@ -1,8 +1,1 @@
-export default function App() {
-  return (
-    <div style={{ padding: 16 }}>
-      <h1>Spokspace</h1>
-      <p>App skeleton is ready.</p>
-    </div>
-  );
-}
+/* App styles live in component/page-specific CSS files. */

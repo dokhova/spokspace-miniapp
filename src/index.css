@@ -22,7 +22,14 @@ body {
   margin: 0;
   padding: 0;
   background: var(--main);
-  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial,
+    sans-serif;
   color: var(--white);
 }
 

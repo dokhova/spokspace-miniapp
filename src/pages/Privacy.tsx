@@ -46,7 +46,11 @@ export default function Privacy() {
             title: "2. Описание сервиса",
             paragraphs: [
               <>
-                Spokspace — это <span className="highlight-text">некоммерческое мини-приложение</span> внутри Telegram, предлагающее пользователям простые практики дыхания, осознанности и саморегуляции, а также календарь отслеживания настроения. Мы не используем рекламу и не продаём данные.
+                Spokspace — это{" "}
+                <span className="highlight-text">некоммерческое мини-приложение</span> внутри
+                Telegram, предлагающее пользователям простые практики дыхания, осознанности и
+                саморегуляции, а также календарь отслеживания настроения. Мы не используем рекламу и
+                не продаём данные.
               </>,
               "Приложение включает добровольные функции пожертвований через Telegram Stars и криптовалюту TON для поддержки разработки и обслуживания проекта.",
             ],
@@ -171,9 +175,7 @@ export default function Privacy() {
               },
               {
                 title: "Интеграции с третьими сторонами",
-                paragraphs: [
-                  "Приложение интегрируется со следующими доверенными сервисами:",
-                ],
+                paragraphs: ["Приложение интегрируется со следующими доверенными сервисами:"],
                 list: [
                   "Telegram Bot API для уведомлений",
                   "Google Analytics и Telegram Analytics для аналитических данных",
@@ -189,7 +191,12 @@ export default function Privacy() {
                 title: "Не медицинское лечение",
                 paragraphs: [
                   <>
-                    Дыхательные упражнения, медитативные практики и техники осознанности, представленные в этом приложении, <span className="highlight-text">не являются медицинским лечением, терапией или медицинскими услугами</span>. Это общие оздоровительные практики для расслабления и управления стрессом.
+                    Дыхательные упражнения, медитативные практики и техники осознанности,
+                    представленные в этом приложении,{" "}
+                    <span className="highlight-text">
+                      не являются медицинским лечением, терапией или медицинскими услугами
+                    </span>
+                    . Это общие оздоровительные практики для расслабления и управления стрессом.
                   </>,
                 ],
               },
@@ -210,7 +217,10 @@ export default function Privacy() {
                 title: "Экстренные ситуации",
                 paragraphs: [
                   <>
-                    Если во время выполнения практик вы испытываете дискомфорт, головокружение, одышку или другие тревожные симптомы, <span className="highlight-text">немедленно прекратите</span> и при необходимости обратитесь за медицинской помощью.
+                    Если во время выполнения практик вы испытываете дискомфорт, головокружение,
+                    одышку или другие тревожные симптомы,{" "}
+                    <span className="highlight-text">немедленно прекратите</span> и при
+                    необходимости обратитесь за медицинской помощью.
                   </>,
                 ],
               },
@@ -284,7 +294,7 @@ export default function Privacy() {
         {
           title: "1. General Provisions",
           paragraphs: [
-            "By using the Spokspace mini-app (hereinafter — \"Application\", \"we\"), you (hereinafter — \"User\") agree to these terms. If you do not agree with them — please stop using the Application.",
+            'By using the Spokspace mini-app (hereinafter — "Application", "we"), you (hereinafter — "User") agree to these terms. If you do not agree with them — please stop using the Application.',
             "The Spokspace application works within Telegram and is not a product of Telegram, Apple, Google or TON Foundation. These companies are not affiliated with us and do not support our product.",
             "The application is intended for users aged 13 and over. If you are under 18, please use the application with parental consent.",
           ],
@@ -293,7 +303,10 @@ export default function Privacy() {
           title: "2. Service Description",
           paragraphs: [
             <>
-              Spokspace is a <span className="highlight-text">non-commercial mini-application</span> within Telegram, offering users simple practices of breathing, mindfulness and self-regulation, as well as a mood tracking calendar. We do not use advertising and do not sell data.
+              Spokspace is a <span className="highlight-text">non-commercial mini-application</span>{" "}
+              within Telegram, offering users simple practices of breathing, mindfulness and
+              self-regulation, as well as a mood tracking calendar. We do not use advertising and do
+              not sell data.
             </>,
             "The application includes voluntary donation features through Telegram Stars and TON cryptocurrency to support the project's development and maintenance.",
           ],
@@ -418,9 +431,7 @@ export default function Privacy() {
             },
             {
               title: "Third-Party Integrations",
-              paragraphs: [
-                "The application integrates with the following trusted services:",
-              ],
+              paragraphs: ["The application integrates with the following trusted services:"],
               list: [
                 "Telegram Bot API for notifications",
                 "Google Analytics and Telegram Analytics for usage insights",
@@ -436,7 +447,12 @@ export default function Privacy() {
               title: "Not Medical Treatment",
               paragraphs: [
                 <>
-                  The breathing exercises, meditation practices, and mindfulness techniques provided in this application are <span className="highlight-text">not medical treatments, therapy, or healthcare services</span>. They are general wellness practices for relaxation and stress management.
+                  The breathing exercises, meditation practices, and mindfulness techniques provided
+                  in this application are{" "}
+                  <span className="highlight-text">
+                    not medical treatments, therapy, or healthcare services
+                  </span>
+                  . They are general wellness practices for relaxation and stress management.
                 </>,
               ],
             },
@@ -457,7 +473,10 @@ export default function Privacy() {
               title: "Emergency Situations",
               paragraphs: [
                 <>
-                  If you experience any discomfort, dizziness, shortness of breath, or other concerning symptoms while using the practices, <span className="highlight-text">stop immediately</span> and seek medical attention if necessary.
+                  If you experience any discomfort, dizziness, shortness of breath, or other
+                  concerning symptoms while using the practices,{" "}
+                  <span className="highlight-text">stop immediately</span> and seek medical
+                  attention if necessary.
                 </>,
               ],
             },
@@ -472,7 +491,7 @@ export default function Privacy() {
         {
           title: "7. General Disclaimer",
           paragraphs: [
-            "The application is provided \"as is\". We do not guarantee error-free or continuous operation. Use of practices from the application is at the user's own risk and responsibility.",
+            'The application is provided "as is". We do not guarantee error-free or continuous operation. Use of practices from the application is at the user\'s own risk and responsibility.',
             "Donation features are voluntary and do not grant special privileges or guarantees of service quality.",
             "We disclaim all liability for any injury, harm, or adverse effects that may result from the use of the breathing exercises, meditation practices, or other content in the application.",
           ],
@@ -511,9 +530,7 @@ export default function Privacy() {
         },
         {
           title: "11. Contacts",
-          paragraphs: [
-            "If you have questions or a request to delete data, please contact us:",
-          ],
+          paragraphs: ["If you have questions or a request to delete data, please contact us:"],
         },
       ] as Section[],
       contact: {
