@@ -73,10 +73,11 @@ export default function PracticePlayer() {
   }, [status, audioSrc]);
 
   useEffect(() => {
+    const audio = audioRef.current;
     return () => {
-      if (!audioRef.current) return;
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+      if (!audio) return;
+      audio.pause();
+      audio.currentTime = 0;
     };
   }, []);
 
