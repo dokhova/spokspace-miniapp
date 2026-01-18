@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/home.css";
 import { useLang } from "../i18n/lang";
+import { API_BASE_URL } from "../config/api";
+import { getTelegramInitData } from "../api/telegram";
 
 type Emotion = "joyful" | "good" | "so-so" | "anxious" | "sad" | "bad";
 
@@ -170,6 +172,8 @@ export default function Home() {
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
   const [currentMonthOffset, setCurrentMonthOffset] = useState(0);
   const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
+  const [debugResult, setDebugResult] = useState<{ status: number; payload: unknown } | null>(null);
+  const [debugLoading, setDebugLoading] = useState(false);
   const [emotions, setEmotions] = useState<Record<string, Emotion>>(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return {};
@@ -328,8 +332,54 @@ export default function Home() {
     setSelectedDateKey(null);
   }
 
+  async function handleTestMe() {
+    const initData = getTelegramInitData() ?? "";
+    setDebugLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/me`, {
+        headers: {
+          "x-telegram-init-data": initData,
+        },
+      });
+      let payload: unknown = null;
+      try {
+        payload = (await response.json()) as unknown;
+      } catch {
+        payload = null;
+      }
+      setDebugResult({ status: response.status, payload });
+    } catch {
+      setDebugResult({ status: 0, payload: { ok: false, reason: "network_error" } });
+    } finally {
+      setDebugLoading(false);
+    }
+  }
+
   const userName = user?.name ?? "User";
   const userInitial = user?.name?.charAt(0)?.toUpperCase() ?? "U";
+  const initDataLength = (getTelegramInitData() ?? "").length;
+  const debugSummary = (() => {
+    if (!debugResult) return null;
+    const payload = debugResult.payload as {
+      ok?: boolean;
+      user?: {
+        id?: number;
+        first_name?: string;
+        last_name?: string;
+        username?: string;
+      };
+      reason?: string;
+      error?: string;
+    } | null;
+    if (payload?.ok && payload.user) {
+      const { id, first_name, last_name, username } = payload.user;
+      return { ok: true, user: { id, first_name, last_name, username } };
+    }
+    if (payload?.ok === false) {
+      return { ok: false, reason: payload.reason ?? payload.error ?? "unknown" };
+    }
+    return payload;
+  })();
 
   return (
     <div className="home">
@@ -452,6 +502,23 @@ export default function Home() {
             </div>
             <img className="today__card-arrow" src="/img/arrow.svg" alt="" />
           </Link>
+        </div>
+
+        <div className="today__debug">
+          <div className="today__debug-title">Debug</div>
+          <div className="today__debug-row">initData length: {initDataLength}</div>
+          <button
+            className="today__debug-button"
+            type="button"
+            onClick={handleTestMe}
+            disabled={debugLoading}
+          >
+            {debugLoading ? "Testing..." : "Test /api/me"}
+          </button>
+          <div className="today__debug-row">status: {debugResult ? debugResult.status : "—"}</div>
+          <pre className="today__debug-output">
+            {debugSummary ? JSON.stringify(debugSummary, null, 2) : "No response yet."}
+          </pre>
         </div>
 
         {selectedDateKey && (
