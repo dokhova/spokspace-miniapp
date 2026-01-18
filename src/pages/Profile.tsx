@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/profile.css";
 import { useLang } from "../i18n/lang";
+import { fetchTelegramMe } from "../api/telegram";
 
 type EmotionToggle = {
   emotionCalendar: boolean;
@@ -10,6 +11,7 @@ type EmotionToggle = {
 type TelegramUser = {
   first_name?: string;
   last_name?: string;
+  username?: string;
   photo_url?: string;
 };
 
@@ -74,40 +76,66 @@ export default function Profile() {
   });
 
   useEffect(() => {
-    const tg = (window as any).Telegram?.WebApp;
-    if (tg) {
-      const tgUser = tg.initDataUnsafe?.user as TelegramUser | undefined;
+    let isMounted = true;
+
+    const resolveUser = async () => {
+      const tg = (window as any).Telegram?.WebApp;
+      const tgUser = tg?.initDataUnsafe?.user as TelegramUser | undefined;
+      const verified = await fetchTelegramMe();
+      if (!isMounted) return;
+
+      if (verified?.ok && verified.user) {
+        const name = [verified.user.first_name, verified.user.last_name]
+          .filter(Boolean)
+          .join(" ");
+        const displayName = name || (verified.user.username ? `@${verified.user.username}` : "User");
+        setUser({
+          name: displayName,
+          photoUrl: tgUser?.photo_url,
+          avatarSeed: 0,
+          isGuest: false,
+        });
+        return;
+      }
+
       if (tgUser) {
         const name = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ");
+        const displayName = name || (tgUser.username ? `@${tgUser.username}` : "User");
         setUser({
-          name: name || "User",
+          name: displayName,
           photoUrl: tgUser.photo_url,
           avatarSeed: 0,
           isGuest: false,
         });
         return;
       }
-    }
 
-    const raw = localStorage.getItem(GUEST_KEY);
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw) as DisplayUser;
-        setUser(parsed);
-        return;
-      } catch {
-        localStorage.removeItem(GUEST_KEY);
+      const raw = localStorage.getItem(GUEST_KEY);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw) as DisplayUser;
+          setUser(parsed);
+          return;
+        } catch {
+          localStorage.removeItem(GUEST_KEY);
+        }
       }
-    }
 
-    const seed = Math.floor(Math.random() * 6);
-    const guestProfile: DisplayUser = {
-      name: "User",
-      avatarSeed: seed,
-      isGuest: true,
+      const seed = Math.floor(Math.random() * 6);
+      const guestProfile: DisplayUser = {
+        name: "User",
+        avatarSeed: seed,
+        isGuest: true,
+      };
+      localStorage.setItem(GUEST_KEY, JSON.stringify(guestProfile));
+      setUser(guestProfile);
     };
-    localStorage.setItem(GUEST_KEY, JSON.stringify(guestProfile));
-    setUser(guestProfile);
+
+    resolveUser();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
