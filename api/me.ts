@@ -17,9 +17,7 @@ type InitDataResult = {
   user: TelegramUser;
 };
 
-type InitDataVerification =
-  | { ok: true; result: InitDataResult }
-  | { ok: false; reason: string };
+type InitDataVerification = { ok: true; result: InitDataResult } | { ok: false; reason: string };
 
 function getInitData(req: VercelRequest): string | null {
   const headerValue = req.headers["x-telegram-init-data"];

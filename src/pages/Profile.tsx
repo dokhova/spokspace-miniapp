@@ -85,10 +85,9 @@ export default function Profile() {
       if (!isMounted) return;
 
       if (verified?.ok && verified.user) {
-        const name = [verified.user.first_name, verified.user.last_name]
-          .filter(Boolean)
-          .join(" ");
-        const displayName = name || (verified.user.username ? `@${verified.user.username}` : "User");
+        const name = [verified.user.first_name, verified.user.last_name].filter(Boolean).join(" ");
+        const displayName =
+          name || (verified.user.username ? `@${verified.user.username}` : "User");
         setUser({
           name: displayName,
           photoUrl: tgUser?.photo_url,

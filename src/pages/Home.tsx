@@ -172,9 +172,7 @@ export default function Home() {
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
   const [currentMonthOffset, setCurrentMonthOffset] = useState(0);
   const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
-  const [debugResult, setDebugResult] = useState<{ status: number; payload: unknown } | null>(
-    null,
-  );
+  const [debugResult, setDebugResult] = useState<{ status: number; payload: unknown } | null>(null);
   const [debugLoading, setDebugLoading] = useState(false);
   const [emotions, setEmotions] = useState<Record<string, Emotion>>(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -517,9 +515,7 @@ export default function Home() {
           >
             {debugLoading ? "Testing..." : "Test /api/me"}
           </button>
-          <div className="today__debug-row">
-            status: {debugResult ? debugResult.status : "—"}
-          </div>
+          <div className="today__debug-row">status: {debugResult ? debugResult.status : "—"}</div>
           <pre className="today__debug-output">
             {debugSummary ? JSON.stringify(debugSummary, null, 2) : "No response yet."}
           </pre>
