@@ -1,3 +1,5 @@
+import { API_BASE_URL } from "../config/api";
+
 export type TelegramMeResponse = {
   ok: boolean;
   user?: {
@@ -9,7 +11,7 @@ export type TelegramMeResponse = {
   };
   auth_date?: number;
   is_premium?: boolean;
-  error?: string;
+  reason?: string;
 };
 
 export function getTelegramInitData(): string | null {
@@ -18,11 +20,10 @@ export function getTelegramInitData(): string | null {
 }
 
 export async function fetchTelegramMe(): Promise<TelegramMeResponse | null> {
-  const initData = getTelegramInitData();
-  if (!initData) return null;
+  const initData = getTelegramInitData() ?? "";
 
   try {
-    const response = await fetch("/api/me", {
+    const response = await fetch(`${API_BASE_URL}/api/me`, {
       headers: {
         "x-telegram-init-data": initData,
       },
