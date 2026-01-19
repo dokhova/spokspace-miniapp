@@ -27,11 +27,11 @@
 
     <script>
       const GA_MEASUREMENT_ID = "%VITE_GA_MEASUREMENT_ID%";
-      const TELEGRAM_ANALYTICS_TOKEN = "%VITE_TELEGRAM_ANALYTICS_TOKEN%";
-      const TELEGRAM_WEBAPP_AVAILABLE = Boolean(window.Telegram?.WebApp);
-      const TELEGRAM_ANALYTICS_ENABLED = Boolean(
-        TELEGRAM_ANALYTICS_TOKEN && TELEGRAM_WEBAPP_AVAILABLE,
-      );
+      const rawTgToken = "%VITE_TELEGRAM_ANALYTICS_TOKEN%";
+      const tgToken = rawTgToken && !rawTgToken.includes("%") ? rawTgToken : "";
+      const isTelegram = !!window.Telegram?.WebApp;
+      const isTelegramWeb = window.Telegram?.WebApp?.platform === "web";
+      const TELEGRAM_ANALYTICS_ENABLED = isTelegram && !isTelegramWeb && !!tgToken;
       const ANALYTICS_ENABLED = Boolean(GA_MEASUREMENT_ID || TELEGRAM_ANALYTICS_ENABLED);
 
       function loadScript(src, onload) {
@@ -61,10 +61,10 @@
       window.telegramAnalyticsReady = false;
 
       function initAnalytics() {
-        if (!TELEGRAM_WEBAPP_AVAILABLE) return;
+        if (!isTelegram) return;
         if (!window.telegramAnalytics?.init) return;
         window.telegramAnalytics.init({
-          token: TELEGRAM_ANALYTICS_TOKEN,
+          token: tgToken,
           appName: "spokspace_miniapp",
         });
 
@@ -161,12 +161,6 @@
       }
 
       const fastAnalytics = new FastAnalytics();
-
-      const rawTgToken = "%VITE_TELEGRAM_ANALYTICS_TOKEN%";
-      const tgToken = rawTgToken && !rawTgToken.includes("%") ? rawTgToken : "";
-
-      const isTelegram = !!window.Telegram?.WebApp;
-      const TELEGRAM_ANALYTICS_ENABLED = isTelegram && !!tgToken;
 
       if (TELEGRAM_ANALYTICS_ENABLED) {
         loadScript("https://tganalytics.xyz/index.js", initAnalytics);
