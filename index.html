@@ -28,7 +28,9 @@
     <script>
       const GA_MEASUREMENT_ID = "%VITE_GA_MEASUREMENT_ID%";
       const TELEGRAM_ANALYTICS_TOKEN = "%VITE_TELEGRAM_ANALYTICS_TOKEN%";
-      const ANALYTICS_ENABLED = Boolean(GA_MEASUREMENT_ID || TELEGRAM_ANALYTICS_TOKEN);
+      const TELEGRAM_INIT_DATA = window.Telegram?.WebApp?.initData;
+      const TELEGRAM_ANALYTICS_ENABLED = Boolean(TELEGRAM_ANALYTICS_TOKEN && TELEGRAM_INIT_DATA);
+      const ANALYTICS_ENABLED = Boolean(GA_MEASUREMENT_ID || TELEGRAM_ANALYTICS_ENABLED);
 
       function loadScript(src, onload) {
         const script = document.createElement("script");
@@ -169,7 +171,7 @@
 
       const fastAnalytics = new FastAnalytics();
 
-      if (TELEGRAM_ANALYTICS_TOKEN) {
+      if (TELEGRAM_ANALYTICS_ENABLED) {
         loadScript("https://tganalytics.xyz/index.js", initAnalytics);
       }
     </script>

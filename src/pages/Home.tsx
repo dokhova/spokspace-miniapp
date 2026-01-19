@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import "../styles/home.css";
 import { useLang } from "../i18n/lang";
 import { API_BASE_URL } from "../config/api";
-import { getTelegramInitData } from "../api/telegram";
+import { getMe, getTelegramInitData } from "../api/telegram";
 
 type Emotion = "joyful" | "good" | "so-so" | "anxious" | "sad" | "bad";
 
@@ -145,6 +145,11 @@ export default function Home() {
             bad: "Плохо",
           } as Record<Emotion, string>,
           weekdays: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
+          connection: {
+            loading: "Загрузка...",
+            connected: "Подключено",
+            notConnected: "Нет подключения",
+          },
         }
       : {
           welcome: "Welcome!",
@@ -164,6 +169,11 @@ export default function Home() {
             bad: "Bad",
           } as Record<Emotion, string>,
           weekdays: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+          connection: {
+            loading: "Loading...",
+            connected: "Connected",
+            notConnected: "Not connected",
+          },
         };
   }, [lang]);
 
@@ -174,6 +184,10 @@ export default function Home() {
   const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
   const [debugResult, setDebugResult] = useState<{ status: number; payload: unknown } | null>(null);
   const [debugLoading, setDebugLoading] = useState(false);
+  const [meStatus, setMeStatus] = useState<{
+    state: "loading" | "connected" | "not_connected";
+    name?: string;
+  }>({ state: "loading" });
   const [emotions, setEmotions] = useState<Record<string, Emotion>>(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return {};
@@ -226,6 +240,26 @@ export default function Home() {
     };
     localStorage.setItem(GUEST_KEY, JSON.stringify(guestProfile));
     setUser(guestProfile);
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadMe = async () => {
+      const result = await getMe();
+      if (!isMounted) return;
+      if (result.ok) {
+        const displayName = result.user?.username || result.user?.first_name || "";
+        setMeStatus({ state: "connected", name: displayName || undefined });
+      } else {
+        setMeStatus({ state: "not_connected" });
+      }
+    };
+
+    loadMe();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -358,6 +392,13 @@ export default function Home() {
   const userName = user?.name ?? "User";
   const userInitial = user?.name?.charAt(0)?.toUpperCase() ?? "U";
   const initDataLength = (getTelegramInitData() ?? "").length;
+  const connectionLabel = useMemo(() => {
+    if (meStatus.state === "loading") return strings.connection.loading;
+    if (meStatus.state === "connected") {
+      return `${strings.connection.connected}${meStatus.name ? ` (${meStatus.name})` : ""}`;
+    }
+    return strings.connection.notConnected;
+  }, [meStatus, strings]);
   const debugSummary = (() => {
     if (!debugResult) return null;
     const payload = debugResult.payload as {
@@ -398,6 +439,8 @@ export default function Home() {
             <div className="today__name">{userName}</div>
           </Link>
         </div>
+
+        <div className="today__me-status">{connectionLabel}</div>
 
         <div className="today__intro">
           <div className="today__welcome">{strings.welcome}</div>
