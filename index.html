@@ -162,7 +162,10 @@
 
       const fastAnalytics = new FastAnalytics();
 
-      if (TELEGRAM_ANALYTICS_ENABLED) {
+      const hasTelegram = !!window.Telegram?.WebApp;
+      const hasToken = !!import.meta?.env?.VITE_TELEGRAM_ANALYTICS_TOKEN;
+
+      if (hasTelegram && hasToken) {
         loadScript("https://tganalytics.xyz/index.js", initAnalytics);
       }
     </script>
