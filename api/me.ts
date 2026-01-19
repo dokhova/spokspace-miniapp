@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import crypto from "crypto";
+import { parse, validate } from "@telegram-apps/init-data-node";
 
 const AUTH_MAX_AGE_SECONDS = 60 * 60 * 24;
 
@@ -12,13 +12,6 @@ type TelegramUser = {
   is_premium?: boolean;
 };
 
-type InitDataResult = {
-  authDate: number;
-  user: TelegramUser;
-};
-
-type InitDataVerification = { ok: true; result: InitDataResult } | { ok: false; reason: string };
-
 function getInitData(req: VercelRequest): string | null {
   const headerValue = req.headers["x-telegram-init-data"];
   if (typeof headerValue === "string" && headerValue.trim()) {
@@ -26,6 +19,12 @@ function getInitData(req: VercelRequest): string | null {
   }
   if (Array.isArray(headerValue) && headerValue[0]?.trim()) {
     return headerValue[0];
+  }
+
+  const authHeader = req.headers.authorization;
+  if (typeof authHeader === "string" && authHeader.trim()) {
+    const token = authHeader.split(" ").pop();
+    if (token?.trim()) return token;
   }
 
   const queryValue = req.query.initData;
@@ -39,62 +38,40 @@ function getInitData(req: VercelRequest): string | null {
   return null;
 }
 
-function timingSafeEqualHex(a: string, b: string): boolean {
-  if (!a || !b || a.length !== b.length || a.length % 2 !== 0) return false;
-  if (!/^[0-9a-f]+$/i.test(a) || !/^[0-9a-f]+$/i.test(b)) return false;
-  const aBuf = Buffer.from(a, "hex");
-  const bBuf = Buffer.from(b, "hex");
-  if (aBuf.length !== bBuf.length) return false;
-  return crypto.timingSafeEqual(aBuf, bBuf);
+function extractAuthDateSeconds(value: unknown): number | null {
+  if (!value || typeof value !== "object") return null;
+  const authDateValue = (value as { auth_date?: unknown }).auth_date;
+
+  if (authDateValue instanceof Date) {
+    return Math.floor(authDateValue.getTime() / 1000);
+  }
+
+  if (typeof authDateValue === "number" && Number.isFinite(authDateValue)) {
+    return Math.floor(authDateValue);
+  }
+
+  if (typeof authDateValue === "string") {
+    const numeric = Number(authDateValue);
+    if (Number.isFinite(numeric)) {
+      return Math.floor(numeric);
+    }
+
+    const parsedDate = new Date(authDateValue);
+    if (!Number.isNaN(parsedDate.getTime())) {
+      return Math.floor(parsedDate.getTime() / 1000);
+    }
+  }
+
+  return null;
 }
 
-function verifyInitData(initData: string, botToken: string): InitDataVerification {
-  const params = new URLSearchParams(initData);
-  const hash = params.get("hash");
-  if (!hash) return { ok: false, reason: "missing_hash" };
-
-  const pairs: Record<string, string> = {};
-  params.forEach((value, key) => {
-    if (key !== "hash") {
-      pairs[key] = value;
-    }
-  });
-
-  const dataCheckString = Object.keys(pairs)
-    .sort()
-    .map((key) => `${key}=${pairs[key]}`)
-    .join("\n");
-
-  const secretKey = crypto.createHmac("sha256", botToken).update("WebAppData").digest();
-  const calculatedHash = crypto
-    .createHmac("sha256", secretKey)
-    .update(dataCheckString)
-    .digest("hex");
-
-  if (!timingSafeEqualHex(calculatedHash, hash)) {
-    return { ok: false, reason: "hash_mismatch" };
-  }
-
-  const authDateRaw = pairs.auth_date;
-  const authDate = authDateRaw ? Number.parseInt(authDateRaw, 10) : Number.NaN;
-  if (!Number.isFinite(authDate)) return { ok: false, reason: "invalid_auth_date" };
-
-  const now = Math.floor(Date.now() / 1000);
-  if (now - authDate > AUTH_MAX_AGE_SECONDS) {
-    return { ok: false, reason: "auth_date_expired" };
-  }
-
-  const userRaw = pairs.user;
-  if (!userRaw) return { ok: false, reason: "missing_user" };
-  let user: TelegramUser;
-  try {
-    user = JSON.parse(userRaw) as TelegramUser;
-  } catch {
-    return { ok: false, reason: "invalid_user_json" };
-  }
-  if (!user?.id) return { ok: false, reason: "missing_user_id" };
-
-  return { ok: true, result: { authDate, user } };
+function extractUser(value: unknown): TelegramUser | null {
+  if (!value || typeof value !== "object") return null;
+  const user = (value as { user?: unknown }).user;
+  if (!user || typeof user !== "object") return null;
+  const id = (user as { id?: unknown }).id;
+  if (typeof id !== "number") return null;
+  return user as TelegramUser;
 }
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
@@ -106,17 +83,38 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 
   const initData = getInitData(req);
   if (!initData) {
-    res.status(401).json({ ok: false, reason: "missing_initData" });
+    res.status(401).json({ ok: false, reason: "missing_init_data" });
     return;
   }
 
-  const verified = verifyInitData(initData, botToken);
-  if (!verified.ok) {
-    res.status(401).json({ ok: false, reason: verified.reason });
+  try {
+    // Use the official Telegram init data validation to match spec and avoid HMAC drift.
+    validate(initData, botToken, { expiresIn: AUTH_MAX_AGE_SECONDS });
+  } catch {
+    res.status(401).json({ ok: false, reason: "hash_mismatch" });
     return;
   }
 
-  const { user, authDate } = verified.result;
+  let parsed: unknown;
+  try {
+    parsed = parse(initData);
+  } catch {
+    res.status(401).json({ ok: false, reason: "hash_mismatch" });
+    return;
+  }
+
+  const user = extractUser(parsed);
+  if (!user) {
+    res.status(401).json({ ok: false, reason: "missing_user" });
+    return;
+  }
+
+  const authDate = extractAuthDateSeconds(parsed);
+  if (authDate === null) {
+    res.status(401).json({ ok: false, reason: "bad_init_data" });
+    return;
+  }
+
   const responseUser = {
     id: user.id,
     first_name: user.first_name,
