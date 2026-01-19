@@ -12,11 +12,36 @@ export type TelegramMeResponse = {
   auth_date?: number;
   is_premium?: boolean;
   reason?: string;
+  error?: string;
 };
 
 export function getTelegramInitData(): string | null {
   if (typeof window === "undefined") return null;
   return window.Telegram?.WebApp?.initData ?? null;
+}
+
+export async function getMe(): Promise<
+  TelegramMeResponse | { ok: false; error: "NO_INIT_DATA" | "REQUEST_FAILED" }
+> {
+  const initData = getTelegramInitData() ?? "";
+  if (!initData) {
+    return { ok: false, error: "NO_INIT_DATA" };
+  }
+
+  try {
+    const response = await fetch("/api/me", {
+      headers: {
+        "x-telegram-init-data": initData,
+      },
+    });
+    if (response.status >= 500) {
+      return { ok: false, error: "REQUEST_FAILED" };
+    }
+    const payload = (await response.json()) as TelegramMeResponse;
+    return payload;
+  } catch {
+    return { ok: false, error: "REQUEST_FAILED" };
+  }
 }
 
 export async function fetchTelegramMe(): Promise<TelegramMeResponse | null> {

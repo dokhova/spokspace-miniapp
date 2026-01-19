@@ -99,6 +99,14 @@
   white-space: nowrap;
 }
 
+.today__me-status {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  color: var(--text-2);
+  letter-spacing: 0.2px;
+}
+
 .today__intro {
   max-width: 100%;
   width: 100%;
