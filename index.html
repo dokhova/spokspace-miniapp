@@ -28,8 +28,10 @@
     <script>
       const GA_MEASUREMENT_ID = "%VITE_GA_MEASUREMENT_ID%";
       const TELEGRAM_ANALYTICS_TOKEN = "%VITE_TELEGRAM_ANALYTICS_TOKEN%";
-      const TELEGRAM_INIT_DATA = window.Telegram?.WebApp?.initData;
-      const TELEGRAM_ANALYTICS_ENABLED = Boolean(TELEGRAM_ANALYTICS_TOKEN && TELEGRAM_INIT_DATA);
+      const TELEGRAM_WEBAPP_AVAILABLE = Boolean(window.Telegram?.WebApp);
+      const TELEGRAM_ANALYTICS_ENABLED = Boolean(
+        TELEGRAM_ANALYTICS_TOKEN && TELEGRAM_WEBAPP_AVAILABLE,
+      );
       const ANALYTICS_ENABLED = Boolean(GA_MEASUREMENT_ID || TELEGRAM_ANALYTICS_ENABLED);
 
       function loadScript(src, onload) {
@@ -59,6 +61,7 @@
       window.telegramAnalyticsReady = false;
 
       function initAnalytics() {
+        if (!TELEGRAM_WEBAPP_AVAILABLE) return;
         if (!window.telegramAnalytics?.init) return;
         window.telegramAnalytics.init({
           token: TELEGRAM_ANALYTICS_TOKEN,
@@ -134,11 +137,7 @@
           const batch = this.eventQueue.splice(0, this.batchSize);
 
           for (const event of batch) {
-            try {
-              await this.sendEvent(event.eventName, event.parameters);
-            } catch (error) {
-              console.error("Analytics error:", error);
-            }
+            await this.sendEvent(event.eventName, event.parameters);
           }
 
           this.processingBatch = false;
@@ -146,25 +145,17 @@
 
         async sendEvent(eventName, parameters) {
           if (window.telegramAnalyticsReady && window.telegramAnalytics?.track) {
-            try {
-              window.telegramAnalytics.track(eventName, parameters);
-            } catch (error) {
-              console.error("Telegram Analytics error:", error);
-            }
+            window.telegramAnalytics.track(eventName, parameters);
           }
 
           if (typeof gtag !== "undefined") {
-            try {
-              gtag("event", eventName, {
-                event_category: "telegram_mini_app",
-                event_label: parameters.practice_type || "unknown",
-                custom_parameter_1: parameters.user_id,
-                custom_parameter_2: parameters.practice_type,
-                value: 1,
-              });
-            } catch (error) {
-              console.error("Google Analytics error:", error);
-            }
+            gtag("event", eventName, {
+              event_category: "telegram_mini_app",
+              event_label: parameters.practice_type || "unknown",
+              custom_parameter_1: parameters.user_id,
+              custom_parameter_2: parameters.practice_type,
+              value: 1,
+            });
           }
         }
       }
