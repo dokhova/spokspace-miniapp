@@ -440,9 +440,7 @@ export default function Home() {
           </Link>
         </div>
 
-        {import.meta.env.DEV && (
-          <div className="connection-status">{connectionLabel}</div>
-        )}
+        {import.meta.env.DEV && <div className="connection-status">{connectionLabel}</div>}
 
         <div className="today__intro">
           <div className="today__welcome">{strings.welcome}</div>
