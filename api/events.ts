@@ -73,10 +73,7 @@ async function loadRecentEvents(dateKey: string): Promise<unknown[]> {
     .filter((item): item is unknown => item !== null);
 }
 
-async function loadAgg(
-  prefix: string,
-  dateKey: string,
-): Promise<Record<string, number>> {
+async function loadAgg(prefix: string, dateKey: string): Promise<Record<string, number>> {
   const keys = await kv.keys(`${prefix}:*:${dateKey}`);
   if (!keys.length) return {};
   const values = await kv.mget<number>(...keys);
