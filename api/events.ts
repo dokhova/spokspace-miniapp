@@ -60,8 +60,67 @@ function getDateKey(payload: EventPayload): string {
   return tsDate.toISOString().slice(0, 10);
 }
 
+async function loadRecentEvents(dateKey: string): Promise<unknown[]> {
+  const items = await kv.lrange<string>(`events:${dateKey}`, 0, 19);
+  return items
+    .map((item) => {
+      try {
+        return JSON.parse(item);
+      } catch {
+        return null;
+      }
+    })
+    .filter((item): item is unknown => item !== null);
+}
+
+async function loadAgg(
+  prefix: string,
+  dateKey: string,
+): Promise<Record<string, number>> {
+  const keys = await kv.keys(`${prefix}:*:${dateKey}`);
+  if (!keys.length) return {};
+  const values = await kv.mget<number>(...keys);
+  const result: Record<string, number> = {};
+  keys.forEach((key, index) => {
+    const parts = key.split(":");
+    const name = parts[1];
+    const value = values[index];
+    if (name && typeof value === "number") {
+      result[name] = value;
+    }
+  });
+  return result;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (applyCors(req, res, { methods: "POST,OPTIONS" })) return;
+  if (applyCors(req, res, { methods: "GET,POST,OPTIONS" })) return;
+
+  if (req.method === "GET") {
+    res.setHeader("Cache-Control", "no-store");
+
+    const dateKey = new Date().toISOString().slice(0, 10);
+    try {
+      const [lastEvents, sourceAgg, campaignAgg] = await Promise.all([
+        loadRecentEvents(dateKey),
+        loadAgg("utm_source", dateKey),
+        loadAgg("utm_campaign", dateKey),
+      ]);
+
+      res.status(200).json({
+        ok: true,
+        ts: new Date().toISOString(),
+        lastEvents,
+        utmAgg: {
+          source: sourceAgg,
+          campaign: campaignAgg,
+          medium: {},
+        },
+      });
+    } catch {
+      res.status(500).json({ ok: false, reason: "storage_error" });
+    }
+    return;
+  }
 
   if (req.method !== "POST") {
     res.status(405).json({ ok: false, reason: "method_not_allowed" });
