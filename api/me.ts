@@ -1,6 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { parse, validate } from "@telegram-apps/init-data-node";
 
+import { applyCors } from "./_lib/cors";
+
 const AUTH_MAX_AGE_SECONDS = 60 * 60 * 24;
 
 type TelegramUser = {
@@ -75,6 +77,8 @@ function extractUser(value: unknown): TelegramUser | null {
 }
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
+  if (applyCors(req, res, { methods: "GET,OPTIONS" })) return;
+
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   if (!botToken) {
     res.status(500).json({ ok: false, reason: "missing_TELEGRAM_BOT_TOKEN" });
