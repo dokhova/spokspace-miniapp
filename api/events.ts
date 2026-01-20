@@ -12,6 +12,7 @@ const EventSchema = z
       .object({
         source: z.string().min(1).optional(),
         campaign: z.string().min(1).optional(),
+        medium: z.string().min(1).optional(),
       })
       .catchall(z.unknown())
       .optional(),
@@ -97,10 +98,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const dateKey = new Date().toISOString().slice(0, 10);
     try {
-      const [lastEvents, sourceAgg, campaignAgg] = await Promise.all([
+      const [lastEvents, sourceAgg, campaignAgg, mediumAgg] = await Promise.all([
         loadRecentEvents(dateKey),
         loadAgg("utm_source", dateKey),
         loadAgg("utm_campaign", dateKey),
+        loadAgg("utm_medium", dateKey),
       ]);
 
       res.status(200).json({
@@ -110,7 +112,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         utmAgg: {
           source: sourceAgg,
           campaign: campaignAgg,
-          medium: {},
+          medium: mediumAgg,
         },
       });
     } catch {
@@ -136,15 +138,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const rawEvent = JSON.stringify(payload);
 
   try {
-    const ops: Array<Promise<number>> = [kv.lpush(`events:${dateKey}`, rawEvent)];
+    const eventsKey = `events:${dateKey}`;
+    const ops: Array<Promise<number>> = [kv.lpush(eventsKey, rawEvent)];
 
     const source = payload.utm?.source?.trim();
-    if (source) ops.push(kv.incr(`utm_source:${source}:${dateKey}`));
+    const sourceKey = source ? `utm_source:${source}:${dateKey}` : null;
+    if (sourceKey) ops.push(kv.incr(sourceKey));
 
     const campaign = payload.utm?.campaign?.trim();
-    if (campaign) ops.push(kv.incr(`utm_campaign:${campaign}:${dateKey}`));
+    const campaignKey = campaign ? `utm_campaign:${campaign}:${dateKey}` : null;
+    if (campaignKey) ops.push(kv.incr(campaignKey));
+
+    const medium = payload.utm?.medium?.trim();
+    const mediumKey = medium ? `utm_medium:${medium}:${dateKey}` : null;
+    if (mediumKey) ops.push(kv.incr(mediumKey));
+
+    console.log("events:post", {
+      dateKey,
+      sourceKey,
+      campaignKey,
+      mediumKey,
+    });
 
     await Promise.all(ops);
+    await kv.ltrim(eventsKey, 0, 199);
   } catch {
     res.status(500).json({ ok: false, reason: "storage_error" });
     return;
