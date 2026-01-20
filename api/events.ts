@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { kv } from "@vercel/kv";
 import { z } from "zod";
 
-import { applyCors } from "./_lib/cors";
+import { applyCors } from "./_lib/cors.js";
 
 const EventSchema = z
   .object({

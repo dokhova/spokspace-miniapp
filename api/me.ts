@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { parse, validate } from "@telegram-apps/init-data-node";
 
-import { applyCors } from "./_lib/cors";
+import { applyCors } from "./_lib/cors.js";
 
 const AUTH_MAX_AGE_SECONDS = 60 * 60 * 24;
 
