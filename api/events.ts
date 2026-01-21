@@ -8,6 +8,7 @@ const EventSchema = z
   .object({
     event: z.string().min(1),
     ts: z.union([z.number(), z.string()]).optional(),
+    client: z.string().optional(),
     utm: z
       .object({
         source: z.string().min(1).optional(),
@@ -108,6 +109,10 @@ function sanitizeEventName(value: string): string {
     .slice(0, 80);
 }
 
+function normalizeClient(value: unknown): "web" | "telegram" {
+  return value === "telegram" ? "telegram" : "web";
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (applyCors(req, res, { methods: "GET,POST,OPTIONS" })) return;
 
@@ -125,6 +130,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         openTodayRaw,
         openGameRaw,
         openPracticeRaw,
+        webTotalRaw,
+        webOpenTodayRaw,
+        webOpenGameRaw,
+        webOpenPracticeRaw,
+        telegramTotalRaw,
+        telegramOpenTodayRaw,
+        telegramOpenGameRaw,
+        telegramOpenPracticeRaw,
       ] = await Promise.all([
         loadRecentEvents(dateKey),
         loadAgg("utm_source", dateKey),
@@ -134,12 +147,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         kv.get("events:byEvent:open_today"),
         kv.get("events:byEvent:open_game"),
         kv.get("events:byEvent:open_practice"),
+        kv.get("events:byClient:web:total"),
+        kv.get("events:byClient:web:byEvent:open_today"),
+        kv.get("events:byClient:web:byEvent:open_game"),
+        kv.get("events:byClient:web:byEvent:open_practice"),
+        kv.get("events:byClient:telegram:total"),
+        kv.get("events:byClient:telegram:byEvent:open_today"),
+        kv.get("events:byClient:telegram:byEvent:open_game"),
+        kv.get("events:byClient:telegram:byEvent:open_practice"),
       ]);
       const totalEvents = toCounter(totalRaw);
       const eventCounts = {
         open_today: toCounter(openTodayRaw),
         open_game: toCounter(openGameRaw),
         open_practice: toCounter(openPracticeRaw),
+      };
+      const clientCounts = {
+        web: {
+          total: toCounter(webTotalRaw),
+          open_today: toCounter(webOpenTodayRaw),
+          open_game: toCounter(webOpenGameRaw),
+          open_practice: toCounter(webOpenPracticeRaw),
+        },
+        telegram: {
+          total: toCounter(telegramTotalRaw),
+          open_today: toCounter(telegramOpenTodayRaw),
+          open_game: toCounter(telegramOpenGameRaw),
+          open_practice: toCounter(telegramOpenPracticeRaw),
+        },
       };
 
       res.status(200).json({
@@ -153,6 +188,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         },
         totalEvents,
         eventCounts,
+        clientCounts,
       });
     } catch {
       res.status(500).json({ ok: false, reason: "storage_error" });
@@ -173,16 +209,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const payload = parsed.data;
+  const client = normalizeClient(payload.client);
   const dateKey = getDateKey(payload);
-  const rawEvent = JSON.stringify(payload);
+  const rawEvent = JSON.stringify({ ...payload, client });
 
   try {
     const eventsKey = `events:${dateKey}`;
     const totalEventsPromise = kv.incr("events:total");
     const safeEventName = sanitizeEventName(payload.event);
     const eventKey = safeEventName ? `events:byEvent:${safeEventName}` : null;
-    const ops: Array<Promise<number>> = [kv.lpush(eventsKey, rawEvent), totalEventsPromise];
+    const clientTotalKey = `events:byClient:${client}:total`;
+    const clientEventKey = safeEventName
+      ? `events:byClient:${client}:byEvent:${safeEventName}`
+      : null;
+    const ops: Array<Promise<number>> = [
+      kv.lpush(eventsKey, rawEvent),
+      totalEventsPromise,
+      kv.incr(clientTotalKey),
+    ];
     if (eventKey) ops.push(kv.incr(eventKey));
+    if (clientEventKey) ops.push(kv.incr(clientEventKey));
 
     const source = payload.utm?.source?.trim();
     const sourceKey = source ? `utm_source:${source}:${dateKey}` : null;
