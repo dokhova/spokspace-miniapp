@@ -76,6 +76,24 @@
   background: linear-gradient(135deg, #ffd527 8%, #34a853 85%, #4285f4 98%);
 }
 
+.metrics-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-1);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.metrics-link:active {
+  background: rgba(255, 255, 255, 0.18);
+}
+
 .offline-banner {
   position: fixed;
   top: 76px;

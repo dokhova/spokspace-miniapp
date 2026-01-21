@@ -8,6 +8,7 @@ import Game from "./pages/Game";
 import Profile from "./pages/Profile";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
+import Metrics from "./pages/Metrics";
 import PracticeDetail from "./pages/practices/PracticeDetail";
 import PracticePlayer from "./pages/practices/PracticePlayer";
 
@@ -25,6 +26,7 @@ export default function App() {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/practice/:id" element={<PracticeDetail />} />
             <Route path="/game" element={<Game />} />
+            <Route path="/metrics" element={<Metrics />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

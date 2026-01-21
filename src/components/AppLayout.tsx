@@ -17,6 +17,7 @@ export function AppLayout() {
   const isTodayTab = location.pathname === "/" || location.pathname === "/today";
   const isPracticesTab = location.pathname === "/practices";
   const isGameTab = location.pathname === "/game";
+  const showMetrics = typeof window !== "undefined" && window.location.search.includes("debug=1");
 
   // Назад показываем не на главных табах
   const isRootTab = location.pathname === "/" || location.pathname === "/today";
@@ -95,6 +96,11 @@ export function AppLayout() {
             RU
           </button>
         </div>
+        {showMetrics && (
+          <a className="metrics-link" href="#/metrics">
+            Metrics
+          </a>
+        )}
       </div>
 
       {!isOnline && <div className="offline-banner">{offlineText}</div>}
