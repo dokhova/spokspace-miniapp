@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import "../styles/game.css";
 import { useLang } from "../i18n/lang";
+import { trackEvent } from "../lib/track";
 
 type Color = "green" | "yellow" | "blue" | "pink";
 
@@ -31,6 +32,10 @@ function areAdjacent(a: number, b: number) {
 
 export default function Game() {
   const { lang } = useLang();
+
+  useEffect(() => {
+    trackEvent("open_game");
+  }, []);
 
   const strings = useMemo(() => {
     return lang === "ru"

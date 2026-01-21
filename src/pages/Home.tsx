@@ -4,6 +4,7 @@ import "../styles/home.css";
 import { useLang } from "../i18n/lang";
 import { API_BASE_URL } from "../config/api";
 import { getMe, getTelegramInitData } from "../api/telegram";
+import { trackEvent } from "../lib/track";
 
 type Emotion = "joyful" | "good" | "so-so" | "anxious" | "sad" | "bad";
 
@@ -197,6 +198,10 @@ export default function Home() {
       return {};
     }
   });
+
+  useEffect(() => {
+    trackEvent("open_today");
+  }, []);
 
   useEffect(() => {
     const tg = (window as any).Telegram?.WebApp;
