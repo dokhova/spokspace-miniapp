@@ -99,6 +99,15 @@ function toCounter(value: unknown): number {
   return 0;
 }
 
+function sanitizeEventName(value: string): string {
+  return value
+    .trim()
+    .replace(/[^\w-]+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 80);
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (applyCors(req, res, { methods: "GET,POST,OPTIONS" })) return;
 
@@ -107,14 +116,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const dateKey = new Date().toISOString().slice(0, 10);
     try {
-      const [lastEvents, sourceAgg, campaignAgg, mediumAgg, totalRaw] = await Promise.all([
+      const [
+        lastEvents,
+        sourceAgg,
+        campaignAgg,
+        mediumAgg,
+        totalRaw,
+        openTodayRaw,
+        openGameRaw,
+        openPracticeRaw,
+      ] = await Promise.all([
         loadRecentEvents(dateKey),
         loadAgg("utm_source", dateKey),
         loadAgg("utm_campaign", dateKey),
         loadAgg("utm_medium", dateKey),
         kv.get("events:total"),
+        kv.get("events:byEvent:open_today"),
+        kv.get("events:byEvent:open_game"),
+        kv.get("events:byEvent:open_practice"),
       ]);
       const totalEvents = toCounter(totalRaw);
+      const eventCounts = {
+        open_today: toCounter(openTodayRaw),
+        open_game: toCounter(openGameRaw),
+        open_practice: toCounter(openPracticeRaw),
+      };
 
       res.status(200).json({
         ok: true,
@@ -126,6 +152,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           medium: mediumAgg,
         },
         totalEvents,
+        eventCounts,
       });
     } catch {
       res.status(500).json({ ok: false, reason: "storage_error" });
@@ -152,7 +179,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const eventsKey = `events:${dateKey}`;
     const totalEventsPromise = kv.incr("events:total");
+    const safeEventName = sanitizeEventName(payload.event);
+    const eventKey = safeEventName ? `events:byEvent:${safeEventName}` : null;
     const ops: Array<Promise<number>> = [kv.lpush(eventsKey, rawEvent), totalEventsPromise];
+    if (eventKey) ops.push(kv.incr(eventKey));
 
     const source = payload.utm?.source?.trim();
     const sourceKey = source ? `utm_source:${source}:${dateKey}` : null;
