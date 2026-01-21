@@ -90,6 +90,15 @@ async function loadAgg(prefix: string, dateKey: string): Promise<Record<string, 
   return result;
 }
 
+function toCounter(value: unknown): number {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const numeric = Number(value);
+    if (Number.isFinite(numeric)) return numeric;
+  }
+  return 0;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (applyCors(req, res, { methods: "GET,POST,OPTIONS" })) return;
 
@@ -98,22 +107,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const dateKey = new Date().toISOString().slice(0, 10);
     try {
-      const [lastEvents, sourceAgg, campaignAgg, mediumAgg] = await Promise.all([
+      const [lastEvents, sourceAgg, campaignAgg, mediumAgg, totalRaw] = await Promise.all([
         loadRecentEvents(dateKey),
         loadAgg("utm_source", dateKey),
         loadAgg("utm_campaign", dateKey),
         loadAgg("utm_medium", dateKey),
+        kv.get("events:total"),
       ]);
+      const totalEvents = toCounter(totalRaw);
 
       res.status(200).json({
         ok: true,
-        ts: new Date().toISOString(),
+        now: new Date().toISOString(),
         lastEvents,
         utmAgg: {
           source: sourceAgg,
           campaign: campaignAgg,
           medium: mediumAgg,
         },
+        totalEvents,
       });
     } catch {
       res.status(500).json({ ok: false, reason: "storage_error" });
@@ -139,7 +151,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const eventsKey = `events:${dateKey}`;
-    const ops: Array<Promise<number>> = [kv.lpush(eventsKey, rawEvent)];
+    const totalEventsPromise = kv.incr("events:total");
+    const ops: Array<Promise<number>> = [kv.lpush(eventsKey, rawEvent), totalEventsPromise];
 
     const source = payload.utm?.source?.trim();
     const sourceKey = source ? `utm_source:${source}:${dateKey}` : null;
@@ -162,10 +175,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     await Promise.all(ops);
     await kv.ltrim(eventsKey, 0, 199);
+    const totalEvents = await totalEventsPromise;
+    res.status(200).json({ ok: true, totalEvents });
+    return;
   } catch {
     res.status(500).json({ ok: false, reason: "storage_error" });
     return;
   }
-
-  res.status(200).json({ ok: true });
 }
