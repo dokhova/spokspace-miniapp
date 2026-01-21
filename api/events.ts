@@ -12,6 +12,7 @@ const EventSchema = z
       .object({
         source: z.string().min(1).optional(),
         campaign: z.string().min(1).optional(),
+        medium: z.string().min(1).optional(),
       })
       .catchall(z.unknown())
       .optional(),
@@ -89,6 +90,15 @@ async function loadAgg(prefix: string, dateKey: string): Promise<Record<string, 
   return result;
 }
 
+function toCounter(value: unknown): number {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const numeric = Number(value);
+    if (Number.isFinite(numeric)) return numeric;
+  }
+  return 0;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (applyCors(req, res, { methods: "GET,POST,OPTIONS" })) return;
 
@@ -97,21 +107,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const dateKey = new Date().toISOString().slice(0, 10);
     try {
-      const [lastEvents, sourceAgg, campaignAgg] = await Promise.all([
+      const [lastEvents, sourceAgg, campaignAgg, mediumAgg, totalRaw] = await Promise.all([
         loadRecentEvents(dateKey),
         loadAgg("utm_source", dateKey),
         loadAgg("utm_campaign", dateKey),
+        loadAgg("utm_medium", dateKey),
+        kv.get("events:total"),
       ]);
+      const totalEvents = toCounter(totalRaw);
 
       res.status(200).json({
         ok: true,
-        ts: new Date().toISOString(),
+        now: new Date().toISOString(),
         lastEvents,
         utmAgg: {
           source: sourceAgg,
           campaign: campaignAgg,
-          medium: {},
+          medium: mediumAgg,
         },
+        totalEvents,
       });
     } catch {
       res.status(500).json({ ok: false, reason: "storage_error" });
@@ -136,19 +150,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const rawEvent = JSON.stringify(payload);
 
   try {
-    const ops: Array<Promise<number>> = [kv.lpush(`events:${dateKey}`, rawEvent)];
+    const eventsKey = `events:${dateKey}`;
+    const totalEventsPromise = kv.incr("events:total");
+    const ops: Array<Promise<number>> = [kv.lpush(eventsKey, rawEvent), totalEventsPromise];
 
     const source = payload.utm?.source?.trim();
-    if (source) ops.push(kv.incr(`utm_source:${source}:${dateKey}`));
+    const sourceKey = source ? `utm_source:${source}:${dateKey}` : null;
+    if (sourceKey) ops.push(kv.incr(sourceKey));
 
     const campaign = payload.utm?.campaign?.trim();
-    if (campaign) ops.push(kv.incr(`utm_campaign:${campaign}:${dateKey}`));
+    const campaignKey = campaign ? `utm_campaign:${campaign}:${dateKey}` : null;
+    if (campaignKey) ops.push(kv.incr(campaignKey));
+
+    const medium = payload.utm?.medium?.trim();
+    const mediumKey = medium ? `utm_medium:${medium}:${dateKey}` : null;
+    if (mediumKey) ops.push(kv.incr(mediumKey));
+
+    console.log("events:post", {
+      dateKey,
+      sourceKey,
+      campaignKey,
+      mediumKey,
+    });
 
     await Promise.all(ops);
+    await kv.ltrim(eventsKey, 0, 199);
+    const totalEvents = await totalEventsPromise;
+    res.status(200).json({ ok: true, totalEvents });
+    return;
   } catch {
     res.status(500).json({ ok: false, reason: "storage_error" });
     return;
   }
-
-  res.status(200).json({ ok: true });
 }
