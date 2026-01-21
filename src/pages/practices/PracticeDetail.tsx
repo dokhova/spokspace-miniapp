@@ -1,15 +1,21 @@
-import type { CSSProperties } from "react";
+import { type CSSProperties, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useLang } from "../../i18n/lang";
 import { pick } from "../../i18n/pick";
 import { tUI } from "../../i18n/strings";
 import { practices } from "./practiceConfig";
+import { trackEvent } from "../../lib/track";
 import "../../styles/practice-detail.css";
 
 export default function PracticeDetail() {
   const { id } = useParams<{ id: string }>();
   const practice = id ? practices[id] : undefined;
   const { lang } = useLang();
+
+  useEffect(() => {
+    if (!practice) return;
+    trackEvent("open_practice", { practiceId: practice.id });
+  }, [practice]);
 
   if (!practice) {
     return (
