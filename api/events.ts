@@ -62,6 +62,11 @@ function getDateKey(payload: EventPayload): string {
   return tsDate.toISOString().slice(0, 10);
 }
 
+function getYesterdayKey(now: Date): string {
+  const utcDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1));
+  return utcDate.toISOString().slice(0, 10);
+}
+
 async function loadRecentEvents(dateKey: string): Promise<unknown[]> {
   const items = await kv.lrange<string>(`events:${dateKey}`, 0, 19);
   return items
@@ -113,13 +118,68 @@ function normalizeClient(value: unknown): "web" | "telegram" {
   return value === "telegram" ? "telegram" : "web";
 }
 
+async function loadDayCounts(dateKey: string) {
+  const [
+    totalRaw,
+    openTodayRaw,
+    openGameRaw,
+    openPracticeRaw,
+    webTotalRaw,
+    webOpenTodayRaw,
+    webOpenGameRaw,
+    webOpenPracticeRaw,
+    telegramTotalRaw,
+    telegramOpenTodayRaw,
+    telegramOpenGameRaw,
+    telegramOpenPracticeRaw,
+  ] = await Promise.all([
+    kv.get(`events:byDay:${dateKey}:total`),
+    kv.get(`events:byDay:${dateKey}:byEvent:open_today`),
+    kv.get(`events:byDay:${dateKey}:byEvent:open_game`),
+    kv.get(`events:byDay:${dateKey}:byEvent:open_practice`),
+    kv.get(`events:byDay:${dateKey}:byClient:web:total`),
+    kv.get(`events:byDay:${dateKey}:byClient:web:byEvent:open_today`),
+    kv.get(`events:byDay:${dateKey}:byClient:web:byEvent:open_game`),
+    kv.get(`events:byDay:${dateKey}:byClient:web:byEvent:open_practice`),
+    kv.get(`events:byDay:${dateKey}:byClient:telegram:total`),
+    kv.get(`events:byDay:${dateKey}:byClient:telegram:byEvent:open_today`),
+    kv.get(`events:byDay:${dateKey}:byClient:telegram:byEvent:open_game`),
+    kv.get(`events:byDay:${dateKey}:byClient:telegram:byEvent:open_practice`),
+  ]);
+
+  return {
+    total: toCounter(totalRaw),
+    byEvent: {
+      open_today: toCounter(openTodayRaw),
+      open_game: toCounter(openGameRaw),
+      open_practice: toCounter(openPracticeRaw),
+    },
+    byClient: {
+      web: {
+        total: toCounter(webTotalRaw),
+        open_today: toCounter(webOpenTodayRaw),
+        open_game: toCounter(webOpenGameRaw),
+        open_practice: toCounter(webOpenPracticeRaw),
+      },
+      telegram: {
+        total: toCounter(telegramTotalRaw),
+        open_today: toCounter(telegramOpenTodayRaw),
+        open_game: toCounter(telegramOpenGameRaw),
+        open_practice: toCounter(telegramOpenPracticeRaw),
+      },
+    },
+  };
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (applyCors(req, res, { methods: "GET,POST,OPTIONS" })) return;
 
   if (req.method === "GET") {
     res.setHeader("Cache-Control", "no-store");
 
-    const dateKey = new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    const dateKey = now.toISOString().slice(0, 10);
+    const yesterdayKey = getYesterdayKey(now);
     try {
       const [
         lastEvents,
@@ -138,6 +198,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         telegramOpenTodayRaw,
         telegramOpenGameRaw,
         telegramOpenPracticeRaw,
+        todayCounts,
+        yesterdayCounts,
       ] = await Promise.all([
         loadRecentEvents(dateKey),
         loadAgg("utm_source", dateKey),
@@ -155,6 +217,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         kv.get("events:byClient:telegram:byEvent:open_today"),
         kv.get("events:byClient:telegram:byEvent:open_game"),
         kv.get("events:byClient:telegram:byEvent:open_practice"),
+        loadDayCounts(dateKey),
+        loadDayCounts(yesterdayKey),
       ]);
       const totalEvents = toCounter(totalRaw);
       const eventCounts = {
@@ -189,6 +253,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         totalEvents,
         eventCounts,
         clientCounts,
+        todayCounts,
+        yesterdayCounts,
       });
     } catch {
       res.status(500).json({ ok: false, reason: "storage_error" });
@@ -222,13 +288,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const clientEventKey = safeEventName
       ? `events:byClient:${client}:byEvent:${safeEventName}`
       : null;
+    const dayTotalKey = `events:byDay:${dateKey}:total`;
+    const dayEventKey = safeEventName ? `events:byDay:${dateKey}:byEvent:${safeEventName}` : null;
+    const dayClientTotalKey = `events:byDay:${dateKey}:byClient:${client}:total`;
+    const dayClientEventKey = safeEventName
+      ? `events:byDay:${dateKey}:byClient:${client}:byEvent:${safeEventName}`
+      : null;
     const ops: Array<Promise<number>> = [
       kv.lpush(eventsKey, rawEvent),
       totalEventsPromise,
       kv.incr(clientTotalKey),
+      kv.incr(dayTotalKey),
+      kv.incr(dayClientTotalKey),
     ];
     if (eventKey) ops.push(kv.incr(eventKey));
     if (clientEventKey) ops.push(kv.incr(clientEventKey));
+    if (dayEventKey) ops.push(kv.incr(dayEventKey));
+    if (dayClientEventKey) ops.push(kv.incr(dayClientEventKey));
 
     const source = payload.utm?.source?.trim();
     const sourceKey = source ? `utm_source:${source}:${dateKey}` : null;
