@@ -68,7 +68,7 @@ function getYesterdayKey(now: Date): string {
 }
 
 async function loadRecentEvents(dateKey: string): Promise<unknown[]> {
-  const items = await kv.lrange<string>(`events:${dateKey}`, 0, 19);
+  const items = (await kv.lrange(`events:${dateKey}`, 0, 19)) as string[];
   return items
     .map((item) => {
       try {
@@ -83,7 +83,7 @@ async function loadRecentEvents(dateKey: string): Promise<unknown[]> {
 async function loadAgg(prefix: string, dateKey: string): Promise<Record<string, number>> {
   const keys = await kv.keys(`${prefix}:*:${dateKey}`);
   if (!keys.length) return {};
-  const values = await kv.mget<number>(...keys);
+  const values = (await kv.mget(...keys)) as Array<number | null>;
   const result: Record<string, number> = {};
   keys.forEach((key, index) => {
     const parts = key.split(":");
