@@ -38,6 +38,27 @@ See `.env.example`.
 
 - `VITE_GA_MEASUREMENT_ID` (optional)
 - `VITE_TELEGRAM_ANALYTICS_TOKEN` (optional)
+- `MIGRATION_TOKEN` (required for migration API routes)
+
+## KV migration (CSV -> JSON)
+
+Emotions:
+
+```bash
+curl -X POST "https://<your-vercel-domain>/api/migrate/emotions" \
+  -H "Authorization: Bearer $MIGRATION_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '[{"user_id":"tg_123","date_key":"2024-01-01","emotion":"calm","created_at":"2024-01-01T10:00:00Z","platform":"telegram"}]'
+```
+
+Best scores:
+
+```bash
+curl -X POST "https://<your-vercel-domain>/api/migrate/best-scores" \
+  -H "Authorization: Bearer $MIGRATION_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '[{"user_id":"tg_123","best_score":42}]'
+```
 
 ## Project structure
 
