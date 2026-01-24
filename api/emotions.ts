@@ -109,7 +109,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-      const dateKeys = await kv.smembers<string>(`emo_idx:${user_id}`);
+      const dateKeys = (await kv.smembers(`emo_idx:${user_id}`)) as string[];
       if (!dateKeys.length) {
         res.status(200).json({ user_id, records: [] });
         return;
