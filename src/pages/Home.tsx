@@ -309,56 +309,6 @@ export default function Home() {
     };
   }, []);
 
-  const apiDateRange = useMemo(() => {
-    if (!daysToShow.length) return null;
-    const dates = daysToShow.map((item) => item.date);
-    const sorted = dates.slice().sort((a, b) => a.getTime() - b.getTime());
-    const from = formatApiDateKey(sorted[0]);
-    const to = formatApiDateKey(sorted[sorted.length - 1]);
-    return { from, to };
-  }, [daysToShow]);
-
-  useEffect(() => {
-    let isActive = true;
-
-    const loadEmotions = async () => {
-      if (!telegramUserId || !apiDateRange) return;
-      try {
-        const params = new URLSearchParams({
-          user_id: telegramUserId,
-          from: apiDateRange.from,
-          to: apiDateRange.to,
-        });
-        const response = await fetch(`${API_BASE_URL}/api/emotions?${params.toString()}`);
-        if (!isActive || !response.ok) return;
-        const payload = (await response.json()) as { records?: EmotionRecord[] };
-        if (!isActive || !Array.isArray(payload.records)) return;
-
-        const nextEmotions: Record<string, Emotion> = {};
-        for (const record of payload.records) {
-          const dateValue = record.date_key ?? record.dateKey;
-          const dateKey = normalizeRecordDateKey(dateValue);
-          if (!dateKey) continue;
-          const emotionValue = String(record.emotion ?? "").trim();
-          if (!EMOTIONS.includes(emotionValue as Emotion)) continue;
-          nextEmotions[dateKey] = emotionValue as Emotion;
-        }
-
-        if (Object.keys(nextEmotions).length > 0) {
-          setEmotions((prev) => ({ ...prev, ...nextEmotions }));
-        }
-      } catch {
-        // Ignore network/API errors in the calendar view.
-      }
-    };
-
-    loadEmotions();
-
-    return () => {
-      isActive = false;
-    };
-  }, [apiDateRange, telegramUserId]);
-
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(emotions));
   }, [emotions]);
@@ -412,6 +362,56 @@ export default function Home() {
 
     return { displayDate, daysToShow: days };
   }, [currentMonthOffset, currentWeekOffset, isExpanded]);
+
+  const apiDateRange = useMemo(() => {
+    if (!daysToShow.length) return null;
+    const dates = daysToShow.map((item) => item.date);
+    const sorted = dates.slice().sort((a, b) => a.getTime() - b.getTime());
+    const from = formatApiDateKey(sorted[0]);
+    const to = formatApiDateKey(sorted[sorted.length - 1]);
+    return { from, to };
+  }, [daysToShow]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadEmotions = async () => {
+      if (!telegramUserId || !apiDateRange) return;
+      try {
+        const params = new URLSearchParams({
+          user_id: telegramUserId,
+          from: apiDateRange.from,
+          to: apiDateRange.to,
+        });
+        const response = await fetch(`${API_BASE_URL}/api/emotions?${params.toString()}`);
+        if (!isActive || !response.ok) return;
+        const payload = (await response.json()) as { records?: EmotionRecord[] };
+        if (!isActive || !Array.isArray(payload.records)) return;
+
+        const nextEmotions: Record<string, Emotion> = {};
+        for (const record of payload.records) {
+          const dateValue = record.date_key ?? record.dateKey;
+          const dateKey = normalizeRecordDateKey(dateValue);
+          if (!dateKey) continue;
+          const emotionValue = String(record.emotion ?? "").trim();
+          if (!EMOTIONS.includes(emotionValue as Emotion)) continue;
+          nextEmotions[dateKey] = emotionValue as Emotion;
+        }
+
+        if (Object.keys(nextEmotions).length > 0) {
+          setEmotions((prev) => ({ ...prev, ...nextEmotions }));
+        }
+      } catch {
+        // Ignore network/API errors in the calendar view.
+      }
+    };
+
+    loadEmotions();
+
+    return () => {
+      isActive = false;
+    };
+  }, [apiDateRange, telegramUserId]);
 
   const currentMonthLabel = useMemo(() => {
     const monthNames = getMonthNames(lang);
