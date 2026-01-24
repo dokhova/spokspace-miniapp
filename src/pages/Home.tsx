@@ -21,6 +21,14 @@ type DisplayUser = {
   isGuest: boolean;
 };
 
+type EmotionRecord = {
+  date_key?: string;
+  dateKey?: string;
+  emotion?: string;
+  platform?: string | null;
+  source?: string | null;
+};
+
 const EMOTIONS: Emotion[] = ["joyful", "good", "so-so", "anxious", "sad", "bad"];
 
 const STORAGE_KEY = "spokspaceEmotions";
@@ -28,6 +36,12 @@ const GUEST_KEY = "spokspaceGuestProfile";
 
 function formatDateKey(date: Date) {
   return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+}
+
+function formatApiDateKey(date: Date) {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
 }
 
 function parseDateKey(key: string) {
@@ -123,6 +137,29 @@ function formatSelectedDate(date: Date, lang: "en" | "ru") {
   return `${dayName}, ${month} ${day}, ${year}`;
 }
 
+function normalizeRecordDateKey(value: unknown) {
+  if (value == null) return null;
+  const trimmed = String(value).trim();
+  if (!trimmed) return null;
+
+  const match = trimmed.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (match) {
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    if (Number.isFinite(year) && Number.isFinite(month) && Number.isFinite(day)) {
+      return formatDateKey(new Date(year, month - 1, day));
+    }
+  }
+
+  const parsed = Date.parse(trimmed);
+  if (!Number.isNaN(parsed)) {
+    return formatDateKey(new Date(parsed));
+  }
+
+  return null;
+}
+
 export default function Home() {
   const { lang } = useLang();
 
@@ -179,6 +216,7 @@ export default function Home() {
   }, [lang]);
 
   const [user, setUser] = useState<DisplayUser | null>(null);
+  const [telegramUserId, setTelegramUserId] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
   const [currentMonthOffset, setCurrentMonthOffset] = useState(0);
@@ -256,8 +294,12 @@ export default function Home() {
       if (result.ok) {
         const displayName = result.user?.username || result.user?.first_name || "";
         setMeStatus({ state: "connected", name: displayName || undefined });
+        if (typeof result.user?.id === "number") {
+          setTelegramUserId(`tg_${result.user.id}`);
+        }
       } else {
         setMeStatus({ state: "not_connected" });
+        setTelegramUserId(null);
       }
     };
 
@@ -320,6 +362,56 @@ export default function Home() {
 
     return { displayDate, daysToShow: days };
   }, [currentMonthOffset, currentWeekOffset, isExpanded]);
+
+  const apiDateRange = useMemo(() => {
+    if (!daysToShow.length) return null;
+    const dates = daysToShow.map((item) => item.date);
+    const sorted = dates.slice().sort((a, b) => a.getTime() - b.getTime());
+    const from = formatApiDateKey(sorted[0]);
+    const to = formatApiDateKey(sorted[sorted.length - 1]);
+    return { from, to };
+  }, [daysToShow]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadEmotions = async () => {
+      if (!telegramUserId || !apiDateRange) return;
+      try {
+        const params = new URLSearchParams({
+          user_id: telegramUserId,
+          from: apiDateRange.from,
+          to: apiDateRange.to,
+        });
+        const response = await fetch(`${API_BASE_URL}/api/emotions?${params.toString()}`);
+        if (!isActive || !response.ok) return;
+        const payload = (await response.json()) as { records?: EmotionRecord[] };
+        if (!isActive || !Array.isArray(payload.records)) return;
+
+        const nextEmotions: Record<string, Emotion> = {};
+        for (const record of payload.records) {
+          const dateValue = record.date_key ?? record.dateKey;
+          const dateKey = normalizeRecordDateKey(dateValue);
+          if (!dateKey) continue;
+          const emotionValue = String(record.emotion ?? "").trim();
+          if (!EMOTIONS.includes(emotionValue as Emotion)) continue;
+          nextEmotions[dateKey] = emotionValue as Emotion;
+        }
+
+        if (Object.keys(nextEmotions).length > 0) {
+          setEmotions((prev) => ({ ...prev, ...nextEmotions }));
+        }
+      } catch {
+        // Ignore network/API errors in the calendar view.
+      }
+    };
+
+    loadEmotions();
+
+    return () => {
+      isActive = false;
+    };
+  }, [apiDateRange, telegramUserId]);
 
   const currentMonthLabel = useMemo(() => {
     const monthNames = getMonthNames(lang);
