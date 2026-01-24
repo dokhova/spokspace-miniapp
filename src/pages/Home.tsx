@@ -35,7 +35,9 @@ const STORAGE_KEY = "spokspaceEmotions";
 const GUEST_KEY = "spokspaceGuestProfile";
 
 function formatDateKey(date: Date) {
-  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
 }
 
 function formatApiDateKey(date: Date) {
@@ -46,7 +48,7 @@ function formatApiDateKey(date: Date) {
 
 function parseDateKey(key: string) {
   const [y, m, d] = key.split("-").map(Number);
-  return new Date(y, m, d);
+  return new Date(y, m - 1, d);
 }
 
 function isSameDay(a: Date, b: Date) {
@@ -227,15 +229,7 @@ export default function Home() {
     state: "loading" | "connected" | "not_connected";
     name?: string;
   }>({ state: "loading" });
-  const [emotions, setEmotions] = useState<Record<string, Emotion>>(() => {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return {};
-    try {
-      return JSON.parse(raw) as Record<string, Emotion>;
-    } catch {
-      return {};
-    }
-  });
+  const [emotions, setEmotions] = useState<Record<string, Emotion>>(() => ({}));
 
   useEffect(() => {
     trackEvent("open_today");
@@ -308,10 +302,6 @@ export default function Home() {
       isMounted = false;
     };
   }, []);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(emotions));
-  }, [emotions]);
 
   useEffect(() => {
     document.body.classList.toggle("modal-open", Boolean(selectedDateKey));
@@ -398,9 +388,8 @@ export default function Home() {
           nextEmotions[dateKey] = emotionValue as Emotion;
         }
 
-        if (Object.keys(nextEmotions).length > 0) {
-          setEmotions((prev) => ({ ...prev, ...nextEmotions }));
-        }
+        setEmotions(nextEmotions);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextEmotions));
       } catch {
         // Ignore network/API errors in the calendar view.
       }
