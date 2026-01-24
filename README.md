@@ -60,6 +60,36 @@ curl -X POST "https://<your-vercel-domain>/api/migrate/best-scores" \
   -d '[{"user_id":"tg_123","best_score":42}]'
 ```
 
+## Legacy CSV import
+
+CSV files are expected at:
+
+- `data/legacy/emotions.csv`
+- `data/legacy/best_scores.csv`
+
+Required env variables for KV access:
+
+- `KV_REST_API_URL`
+- `KV_REST_API_TOKEN`
+
+Dry run (no KV writes):
+
+```bash
+node scripts/import-legacy-emotions.mjs --dry-run
+```
+
+Apply import:
+
+```bash
+node scripts/import-legacy-emotions.mjs --apply
+```
+
+Verify via API after `--apply`:
+
+```bash
+curl "https://<your-vercel-domain>/api/emotions?user_id=tg_test&from=2024-01-01&to=2024-01-31"
+```
+
 ## Project structure
 
 - `src/pages` — pages and screens.
