@@ -108,7 +108,7 @@ function findColumnIndex(headers, variants, required) {
     const found = headers.map((value) => value.trim()).filter(Boolean);
     const missing = variants.join("/");
     throw new Error(
-      `Missing required column: ${missing}. Found columns: ${found.length ? found.join(", ") : "<none>"}`
+      `Missing required column: ${missing}. Found columns: ${found.length ? found.join(", ") : "<none>"}`,
     );
   }
 
@@ -222,7 +222,9 @@ async function importEmotions({ apply }) {
 
     const dateKey = normalizeDateKey(row[dateKeyIndex]);
     if (!dateKey) {
-      console.warn(`[emotions] Row ${rowNumber}: invalid date_key "${row[dateKeyIndex]}", skipping.`);
+      console.warn(
+        `[emotions] Row ${rowNumber}: invalid date_key "${row[dateKeyIndex]}", skipping.`,
+      );
       stats.warnings += 1;
       stats.skipped += 1;
       continue;
