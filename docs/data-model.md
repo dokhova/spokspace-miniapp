@@ -1,47 +1,36 @@
-# Data model (Spokspace)
-
-## Source of truth
-Backend (KV) is the source of truth.
-Google Sheets is a read-only dashboard.
-
----
-
-## Events (raw)
-
-**Purpose:** store user interactions for debugging and simple funnels.
-
-**Fields:**
-- `event_name` (string) — e.g. `open_app`, `add_habit`, `specialist_more`
-- `client` (string) — `web` | `telegram`
-- `ts` (number) — unix timestamp (ms)
-- `day` (string) — `YYYY-MM-DD` in user timezone
-- `utm_source` (string | null)
-- `utm_medium` (string | null)
-- `payload` (object | null) — optional metadata
-
-**Storage:**
-- KV list: keep last N events (e.g. 200) for debug
-
----
-
 ## Daily metrics (aggregated)
 
-**Purpose:** fast counters for dashboards and reporting.
+**Purpose:** fast counters for dashboards (read-only).
 
-**Fields (per day):**
-- `day` (string) — `YYYY-MM-DD`
-- `total` (number)
-- `web_total` (number)
-- `telegram_total` (number)
-- `utm_source_*` (number) — counters by source
-- `utm_medium_*` (number) — counters by medium
-- `generatedAt` (string) — ISO datetime of last update
+**Endpoint:**
+- `GET /api/metrics-daily`
 
-**Storage:**
-- KV hash/object per day (or per metric key)
+**Response fields:**
+- `date` (string) — `YYYY-MM-DD` (UTC, from `new Date().toISOString().slice(0,10)`)
+- `today_total` (number)
+- `today_web_total` (number)
+- `today_telegram_total` (number)
 
----
+Per-event totals:
+- `today_open_today`
+- `today_open_game`
+- `today_open_practice`
 
-## Notes
-- Day is calculated by user timezone (not UTC).
-- Sheets should not calculate anything, only read `/api/metrics-daily`.
+Per-event by client:
+- `today_web_open_today`
+- `today_web_open_game`
+- `today_web_open_practice`
+- `today_telegram_open_today`
+- `today_telegram_open_game`
+- `today_telegram_open_practice`
+
+- `generatedAt` (string) — ISO datetime
+
+**Storage keys (KV):**
+- `events:byDay:{date}:total`
+- `events:byDay:{date}:byEvent:{event_name}`
+- `events:byDay:{date}:byClient:{client}:total`
+- `events:byDay:{date}:byClient:{client}:byEvent:{event_name}`
+
+**Notes:**
+- Daily metrics date is calculated in UTC (ISO date).
