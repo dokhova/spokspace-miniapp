@@ -2,8 +2,11 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { parse, validate } from "@telegram-apps/init-data-node";
 
 import { applyCors } from "./_lib/cors.js";
+import { rateLimit } from "./_lib/rateLimit.js";
 
 const AUTH_MAX_AGE_SECONDS = 60 * 60 * 24;
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX = 60;
 
 type TelegramUser = {
   id: number;
@@ -76,8 +79,17 @@ function extractUser(value: unknown): TelegramUser | null {
   return user as TelegramUser;
 }
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (applyCors(req, res, { methods: "GET,OPTIONS" })) return;
+
+  const limitResult = await rateLimit(req, "me", {
+    windowMs: RATE_LIMIT_WINDOW_MS,
+    limit: RATE_LIMIT_MAX,
+  });
+  if (!limitResult.allowed) {
+    res.status(429).json({ ok: false, reason: "rate_limited" });
+    return;
+  }
 
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   if (!botToken) {

@@ -2,6 +2,10 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { kv } from "@vercel/kv";
 
 import { applyCors } from "./_lib/cors.js";
+import { rateLimit } from "./_lib/rateLimit.js";
+
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX = 60;
 
 function toCounter(value: unknown): number {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -17,6 +21,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method !== "GET") {
     res.status(405).json({ ok: false, reason: "method_not_allowed" });
+    return;
+  }
+
+  const limitResult = await rateLimit(req, "metrics-daily", {
+    windowMs: RATE_LIMIT_WINDOW_MS,
+    limit: RATE_LIMIT_MAX,
+  });
+  if (!limitResult.allowed) {
+    res.status(429).json({ ok: false, reason: "rate_limited" });
     return;
   }
 
