@@ -1,4 +1,8 @@
 import { useEffect, useState } from "react";
+import { fetchJsonWithCache } from "../lib/cache";
+
+const METRICS_CACHE_TTL_MS = 5 * 60 * 1000; // Metrics dashboard can be 5 minutes stale.
+const METRICS_CACHE_KEY = "metrics:events"; // Shared cache; no auth context.
 
 type MetricsData = {
   totalEvents?: number;
@@ -17,11 +21,12 @@ export default function Metrics() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/events");
-      if (!response.ok) {
-        throw new Error("Request failed");
-      }
-      const payload = (await response.json()) as MetricsData;
+      const payload = await fetchJsonWithCache<MetricsData>(
+        "/api/events",
+        METRICS_CACHE_KEY,
+        METRICS_CACHE_TTL_MS,
+        { revalidate: true },
+      );
       setData(payload);
     } catch {
       setError("Failed to load metrics");
