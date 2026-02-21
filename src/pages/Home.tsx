@@ -5,6 +5,7 @@ import { useLang } from "../i18n/lang";
 import { API_BASE_URL } from "../config/api";
 import { getMe, getTelegramInitData } from "../api/telegram";
 import { trackEvent } from "../lib/track";
+import { fetchJsonWithCache } from "../lib/cache";
 
 type Emotion = "joyful" | "good" | "so-so" | "anxious" | "sad" | "bad";
 
@@ -31,8 +32,8 @@ type EmotionRecord = {
 
 const EMOTIONS: Emotion[] = ["joyful", "good", "so-so", "anxious", "sad", "bad"];
 
-const STORAGE_KEY = "spokspaceEmotions";
 const GUEST_KEY = "spokspaceGuestProfile";
+const EMOTIONS_CACHE_TTL_MS = 10 * 60 * 1000; // Calendar ranges change slowly; 10 minutes is fine.
 
 function formatDateKey(date: Date) {
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -373,9 +374,13 @@ export default function Home() {
           from: apiDateRange.from,
           to: apiDateRange.to,
         });
-        const response = await fetch(`${API_BASE_URL}/api/emotions?${params.toString()}`);
-        if (!isActive || !response.ok) return;
-        const payload = (await response.json()) as { records?: EmotionRecord[] };
+        const cacheKey = `emotions:${telegramUserId}:${apiDateRange.from}:${apiDateRange.to}`; // Include user_id + range.
+        const payload = await fetchJsonWithCache<{ records?: EmotionRecord[] }>(
+          `${API_BASE_URL}/api/emotions?${params.toString()}`,
+          cacheKey,
+          EMOTIONS_CACHE_TTL_MS,
+          { revalidate: true },
+        );
         if (!isActive || !Array.isArray(payload.records)) return;
 
         const nextEmotions: Record<string, Emotion> = {};
@@ -389,7 +394,6 @@ export default function Home() {
         }
 
         setEmotions(nextEmotions);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextEmotions));
       } catch {
         // Ignore network/API errors in the calendar view.
       }
