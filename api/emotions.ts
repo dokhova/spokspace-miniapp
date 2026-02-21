@@ -3,6 +3,10 @@ import { kv } from "@vercel/kv";
 import { z } from "zod";
 
 import { applyCors } from "./_lib/cors.js";
+import { rateLimit } from "./_lib/rateLimit.js";
+
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX = 60;
 
 const UserIdSchema = z.string().regex(/^tg_.+$/, "user_id must start with tg_");
 const DateKeySchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date_key must be YYYY-MM-DD");
@@ -89,6 +93,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (applyCors(req, res, { methods: "GET,POST,OPTIONS" })) return;
 
   if (req.method === "GET") {
+    const limitResult = await rateLimit(req, "emotions", {
+      windowMs: RATE_LIMIT_WINDOW_MS,
+      limit: RATE_LIMIT_MAX,
+    });
+    if (!limitResult.allowed) {
+      res.status(429).json({ ok: false, reason: "rate_limited" });
+      return;
+    }
+
     res.setHeader("Cache-Control", "no-store");
 
     const query = EmotionsQuerySchema.safeParse({
@@ -135,6 +148,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === "POST") {
+    const limitResult = await rateLimit(req, "emotions", {
+      windowMs: RATE_LIMIT_WINDOW_MS,
+      limit: RATE_LIMIT_MAX,
+    });
+    if (!limitResult.allowed) {
+      res.status(429).json({ ok: false, reason: "rate_limited" });
+      return;
+    }
+
     const payload = EmotionPayloadSchema.safeParse(extractJsonBody(req));
     if (!payload.success) {
       res.status(400).json({ ok: false, reason: "invalid_payload", issues: payload.error.issues });
