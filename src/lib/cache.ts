@@ -38,6 +38,22 @@ export function isFresh(entry: CacheEntry<unknown>): boolean {
   return entry.expiresAt > Date.now();
 }
 
+export function listCacheKeys(prefix: string): string[] {
+  if (!hasStorage()) return [];
+  try {
+    const keys: string[] = [];
+    for (let i = 0; i < window.localStorage.length; i += 1) {
+      const key = window.localStorage.key(i);
+      if (key && key.startsWith(prefix)) {
+        keys.push(key);
+      }
+    }
+    return keys;
+  } catch {
+    return [];
+  }
+}
+
 export async function fetchJsonWithCache<T>(
   url: string,
   cacheKey: string,

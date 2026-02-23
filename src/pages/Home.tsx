@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/home.css";
 import { useLang } from "../i18n/lang";
 import { API_BASE_URL } from "../config/api";
 import { getMe, getTelegramInitData } from "../api/telegram";
 import { trackEvent } from "../lib/track";
-import { fetchJsonWithCache } from "../lib/cache";
+import { fetchJsonWithCache, getCache, isFresh, listCacheKeys } from "../lib/cache";
 
 type Emotion = "joyful" | "good" | "so-so" | "anxious" | "sad" | "bad";
 
@@ -30,10 +30,16 @@ type EmotionRecord = {
   source?: string | null;
 };
 
+type EmotionCachePayload = {
+  user_id?: string;
+  records?: EmotionRecord[];
+};
+
 const EMOTIONS: Emotion[] = ["joyful", "good", "so-so", "anxious", "sad", "bad"];
 
 const GUEST_KEY = "spokspaceGuestProfile";
 const EMOTIONS_CACHE_TTL_MS = 10 * 60 * 1000; // Calendar ranges change slowly; 10 minutes is fine.
+const EMOTIONS_CACHE_PREFIX = "emotions:";
 
 function formatDateKey(date: Date) {
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -163,8 +169,70 @@ function normalizeRecordDateKey(value: unknown) {
   return null;
 }
 
+function parseEmotionCacheKey(key: string, userId: string) {
+  const prefix = `${EMOTIONS_CACHE_PREFIX}${userId}:`;
+  if (!key.startsWith(prefix)) return null;
+  const parts = key.slice(prefix.length).split(":");
+  if (parts.length < 2) return null;
+  const [from, to] = parts;
+  if (!from || !to) return null;
+  return { from, to };
+}
+
+function isRangeCovered(cachedFrom: string, cachedTo: string, from: string, to: string) {
+  return cachedFrom <= from && cachedTo >= to;
+}
+
+function dateKeyToTime(value: string) {
+  const parsed = Date.parse(value);
+  if (Number.isNaN(parsed)) return null;
+  return parsed;
+}
+
+function findCoveringEmotionCache(userId: string, from: string, to: string) {
+  const keys = listCacheKeys(`${EMOTIONS_CACHE_PREFIX}${userId}:`);
+  if (!keys.length) return null;
+
+  let best: {
+    key: string;
+    payload: EmotionCachePayload;
+    cachedFrom: string;
+    cachedTo: string;
+    spanMs: number;
+  } | null = null;
+
+  for (const key of keys) {
+    const range = parseEmotionCacheKey(key, userId);
+    if (!range) continue;
+    if (!isRangeCovered(range.from, range.to, from, to)) continue;
+
+    const entry = getCache<EmotionCachePayload>(key);
+    if (!entry || !isFresh(entry)) continue;
+
+    const fromTime = dateKeyToTime(range.from);
+    const toTime = dateKeyToTime(range.to);
+    if (fromTime == null || toTime == null) continue;
+
+    const spanMs = toTime - fromTime;
+    if (!best || spanMs < best.spanMs) {
+      best = {
+        key,
+        payload: entry.value ?? {},
+        cachedFrom: range.from,
+        cachedTo: range.to,
+        spanMs,
+      };
+    }
+  }
+
+  return best;
+}
+
 export default function Home() {
   const { lang } = useLang();
+  const inFlightEmotions = useRef(
+    new Map<string, Promise<{ records?: EmotionRecord[] }>>(),
+  );
 
   const strings = useMemo(() => {
     return lang === "ru"
@@ -369,25 +437,50 @@ export default function Home() {
     const loadEmotions = async () => {
       if (!telegramUserId || !apiDateRange) return;
       try {
-        const params = new URLSearchParams({
-          user_id: telegramUserId,
-          from: apiDateRange.from,
-          to: apiDateRange.to,
-        });
         const cacheKey = `emotions:${telegramUserId}:${apiDateRange.from}:${apiDateRange.to}`; // Include user_id + range.
-        const payload = await fetchJsonWithCache<{ records?: EmotionRecord[] }>(
-          `${API_BASE_URL}/api/emotions?${params.toString()}`,
-          cacheKey,
-          EMOTIONS_CACHE_TTL_MS,
-          { revalidate: true },
-        );
-        if (!isActive || !Array.isArray(payload.records)) return;
+        let payload: { records?: EmotionRecord[] } | null = null;
+        const inFlight = inFlightEmotions.current.get(cacheKey);
+
+        if (inFlight) {
+          payload = await inFlight;
+        } else {
+          const covering = findCoveringEmotionCache(
+            telegramUserId,
+            apiDateRange.from,
+            apiDateRange.to,
+          );
+
+          if (covering) {
+            payload = covering.payload;
+          } else {
+            const params = new URLSearchParams({
+              user_id: telegramUserId,
+              from: apiDateRange.from,
+              to: apiDateRange.to,
+            });
+            const request = fetchJsonWithCache<{ records?: EmotionRecord[] }>(
+              `${API_BASE_URL}/api/emotions?${params.toString()}`,
+              cacheKey,
+              EMOTIONS_CACHE_TTL_MS,
+              { revalidate: false },
+            );
+            inFlightEmotions.current.set(cacheKey, request);
+            try {
+              payload = await request;
+            } finally {
+              inFlightEmotions.current.delete(cacheKey);
+            }
+          }
+        }
+
+        if (!isActive || !Array.isArray(payload?.records)) return;
 
         const nextEmotions: Record<string, Emotion> = {};
         for (const record of payload.records) {
           const dateValue = record.date_key ?? record.dateKey;
           const dateKey = normalizeRecordDateKey(dateValue);
           if (!dateKey) continue;
+          if (dateKey < apiDateRange.from || dateKey > apiDateRange.to) continue;
           const emotionValue = String(record.emotion ?? "").trim();
           if (!EMOTIONS.includes(emotionValue as Emotion)) continue;
           nextEmotions[dateKey] = emotionValue as Emotion;
