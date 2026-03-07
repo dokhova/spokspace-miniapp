@@ -1,7 +1,7 @@
 .home {
   width: 100%;
   min-height: 100vh;
-  padding: 112px 0 112px;
+  padding: 96px 0 112px;
   box-sizing: border-box;
 }
 
@@ -18,7 +18,7 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 24px;
 }
 
 .today__logo {
@@ -132,8 +132,8 @@
 
 .today__calendar {
   width: 100%;
-  margin-top: 8px;
-  margin-bottom: 40px;
+  margin-top: 0;
+  margin-bottom: 0;
   position: relative;
   z-index: 1;
 }

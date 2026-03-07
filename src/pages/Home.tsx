@@ -316,7 +316,7 @@ export default function Home() {
       tg.MainButton?.hide?.();
       const tgUser = tg.initDataUnsafe?.user as TelegramUser | undefined;
       if (tgUser) {
-        const name = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ");
+        const name = tgUser.first_name?.trim();
         setUser({
           name: name || "User",
           photoUrl: tgUser.photo_url,
