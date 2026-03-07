@@ -116,3 +116,36 @@ curl "https://<your-vercel-domain>/api/emotions?user_id=tg_test&from=2024-01-01&
 ## License
 
 MIT.
+
+## Backend v1.0 — Technical Notes
+
+### Rate limiting
+
+- Configuration: `RATE_LIMIT_MAX = 60`, `RATE_LIMIT_WINDOW_MS = 60 * 1000` (60 requests per 60 seconds).
+- Key logic:
+  - `rl:<route>:<userId>` when `userId` is available.
+  - `rl:<route>:ip:<x-forwarded-for>` when `userId` is not available.
+- Storage: Vercel KV via `kv.incr` with `kv.expire` window TTL.
+- On exceed: HTTP `429` with `{ "ok": false, "reason": "rate_limited" }`.
+
+### Caching
+
+- `GET /api/health`
+  - `Cache-Control: public, max-age=0, must-revalidate`
+  - No rate limit
+- `GET /api/metrics-daily`
+  - `Cache-Control: no-store`
+- `GET /api/me`
+  - Supports `ETag` and `304 Not Modified`
+
+### Source of truth
+
+- Persistent backend data is stored in Vercel KV.
+- Single KV namespace is used.
+- No secondary database.
+
+### Backend environment
+
+- Production and Preview use the same KV configuration.
+- No environment-based branching in business logic.
+- Backend logic is environment-agnostic.
