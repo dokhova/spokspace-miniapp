@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { createHash } from "node:crypto";
 import { parse, validate } from "@telegram-apps/init-data-node";
 
 import { applyCors } from "./_lib/cors.js";
@@ -79,8 +80,18 @@ function extractUser(value: unknown): TelegramUser | null {
   return user as TelegramUser;
 }
 
+function buildEtag(payload: unknown): string {
+  const hash = createHash("sha1").update(JSON.stringify(payload)).digest("hex");
+  return `"${hash}"`;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (applyCors(req, res, { methods: "GET,OPTIONS" })) return;
+
+  if (req.method !== "GET") {
+    res.status(405).json({ ok: false, reason: "method_not_allowed" });
+    return;
+  }
 
   const limitResult = await rateLimit(req, "me", {
     windowMs: RATE_LIMIT_WINDOW_MS,
@@ -139,10 +150,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     language_code: user.language_code,
   };
 
-  res.status(200).json({
+  const responseBody = {
     ok: true,
     user: responseUser,
     auth_date: authDate,
     is_premium: user.is_premium,
-  });
+  };
+
+  const etag = buildEtag(responseBody);
+  const ifNoneMatch = req.headers["if-none-match"];
+  const requestedEtag = Array.isArray(ifNoneMatch) ? ifNoneMatch[0] : ifNoneMatch;
+
+  res.setHeader("ETag", etag);
+  if (typeof requestedEtag === "string" && requestedEtag === etag) {
+    res.status(304).end();
+    return;
+  }
+
+  res.status(200).json(responseBody);
 }
