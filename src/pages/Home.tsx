@@ -230,9 +230,7 @@ function findCoveringEmotionCache(userId: string, from: string, to: string) {
 
 export default function Home() {
   const { lang } = useLang();
-  const inFlightEmotions = useRef(
-    new Map<string, Promise<{ records?: EmotionRecord[] }>>(),
-  );
+  const inFlightEmotions = useRef(new Map<string, Promise<{ records?: EmotionRecord[] }>>());
 
   const strings = useMemo(() => {
     return lang === "ru"
@@ -316,7 +314,7 @@ export default function Home() {
       tg.MainButton?.hide?.();
       const tgUser = tg.initDataUnsafe?.user as TelegramUser | undefined;
       if (tgUser) {
-        const name = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ");
+        const name = tgUser.first_name?.trim();
         setUser({
           name: name || "User",
           photoUrl: tgUser.photo_url,

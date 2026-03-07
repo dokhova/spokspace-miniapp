@@ -30,3 +30,4 @@ dist-ssr
 
 # Legacy CSV imports
 data/legacy/*.csv
+.vercel
